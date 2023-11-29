@@ -103,11 +103,13 @@ class WeChat:
     def fetch_wx_pageInfo(self):
         wx_browser=uia.PaneControl(ClassName='Chrome_WidgetWin_0')
         if not wx_browser.Exists(maxSearchSeconds=10):
+            print('wx_browser not exists!')
             return
         wx_browser.SwitchToThisWindow()
         wx_browser.SetFocus()
         doc=wx_browser.Control(ClassName='Chrome_RenderWidgetHostHWND')
         if not doc.Exists(maxSearchSeconds=10):
+            print('wx_browser document not exists!')
             return
         gc=doc.GroupControl()
         # uia.WaitForExist(gc, timeout=30)
@@ -135,8 +137,10 @@ class WeChat:
         print(msg_content, msg_sender)
         if name=='[链接]':
             listItem.ButtonControl(foundIndex=2).Click()
-            title,url=self.fetch_wx_pageInfo()
-            print('\t',title,url)
+            page_info=self.fetch_wx_pageInfo()
+            if page_info is not None:
+                title,url=page_info
+                print('\t',title,url)
             pass
         elif name=='[视频]':
 
