@@ -1,4 +1,4 @@
-
+import math
 import os
 import re
 import time
@@ -46,39 +46,118 @@ class WeChat:
         self.SearchBox = self.wx_win.EditControl(Name='搜索')
         self.MsgList = self.wx_win.ListControl(Name='消息')
 
+    def weekday_to_date(today:datetime,weekday):
+        if weekday == '一':
+            return today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(weeks=-1)
+        elif weekday == '二':
+            return today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(weeks=-2)
+        elif weekday == '三':
+            return today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(weeks=-3)
+        elif weekday == '四':
+            return today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(weeks=-4)
+        elif weekday == '五':
+            return today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(weeks=-5)
+        elif weekday == '六':
+            return today - datetime.timedelta(days=today.weekday()) + datetime.timedelta(weeks=-6)
+
     def str_to_time(self,str):
         time=None
+        today=datetime.strptime(datetime.now().strftime('%Y-%m-%d'),'%Y-%m-%d')
         if str == '昨天':
-            time=datetime.today()-timedelta(seconds=1)
+            time=today-timedelta(seconds=1)
         elif re.match('\d{2}/\d{2}/\d{2}',str) is not None:
             time=datetime.strptime(str,'%y/%m/%d')
         elif re.match('\d+:\d+',str) is not None:
             time=datetime.strptime(f'{datetime.today().date().strftime("%Y-%m-%d")} {str}','%Y-%m-%d %H:%M')
         return time
 
+    # def get_session_list(self):
+    #     uia.SetGlobalSearchTimeout(0.01)
+    #     # self.UiaAPI.SwitchToThisWindow()
+    #
+    #     list0=self.SessionList.GetChildren()
+    #     session_list=[]
+    #     for item in list0:
+    #         temp=[]
+    #         session_name=item.ButtonControl().Name
+    #         for i in range(2,5):
+    #             try:
+    #                 tc= item.TextControl(foundIndex=i)
+    #                 if tc.Exists(maxSearchSeconds=0):
+    #                     str = item.TextControl(foundIndex=i).Name
+    #                     temp.append(str)
+    #             except:
+    #                 break
+    #         session=SessionInfo()
+    #         session.SessionName=session_name
+    #         session.LastMsgStrTime=temp[0] if len(temp)>0 else None
+    #         session.LastMsgTime=self.str_to_time(temp[0]) if len(temp)>0 else None
+    #         session.LastMsgSub=temp[1] if len(temp)>1 else None
+    #         session.NewMsgNum=temp[2] if len(temp)>2 else 0
+    #         session_list.append(session)
+    #     return session_list
+
+    def get_session_info(self,item:ListItemControl):
+        head_btn = item.ButtonControl()
+        if not head_btn.Exists(maxSearchSeconds=0):
+            return
+        session_name = head_btn.Name
+        if session_name=='折叠置顶聊天':
+            return
+        temp = []
+        for i in range(2, 5):
+            tc = item.TextControl(foundIndex=i)
+            if tc.Exists(maxSearchSeconds=0):
+                str = item.TextControl(foundIndex=i).Name
+                temp.append(str)
+        session = SessionInfo()
+        session.SessionName = session_name
+        session.LastMsgStrTime = temp[0] if len(temp) > 0 else None
+        session.LastMsgTime = self.str_to_time(temp[0]) if len(temp) > 0 else None
+        session.LastMsgSub = temp[1] if len(temp) > 1 else None
+        session.NewMsgNum = int(temp[2]) if len(temp) > 2 else 0
+        return session
+
     def get_session_list(self):
-        uia.SetGlobalSearchTimeout(0.01)
-        # self.UiaAPI.SwitchToThisWindow()
-        list0=self.SessionList.GetChildren()
-        session_list=[]
-        for item in list0:
-            temp=[]
-            session_name=item.ButtonControl().Name
-            for i in range(2,5):
-                try:
-                    tc= item.TextControl(foundIndex=i)
-                    if tc.Exists(maxSearchSeconds=0):
-                        str = item.TextControl(foundIndex=i).Name
-                        temp.append(str)
-                except:
-                    break
-            session=SessionInfo()
-            session.SessionName=session_name
-            session.LastMsgStrTime=temp[0] if len(temp)>0 else None
-            session.LastMsgTime=self.str_to_time(temp[0]) if len(temp)>0 else None
-            session.LastMsgSub=temp[1] if len(temp)>1 else None
-            session.NewMsgNum=temp[2] if len(temp)>2 else 0
-            session_list.append(session)
+        show_percent=1
+        hidd_percent=0
+        scroll=self.SessionList.GetScrollPattern()
+        # print(self.SessionList.BoundingRectangle)
+        # print(scroll.VerticallyScrollable, scroll.VerticalScrollPercent, scroll.VerticalViewSize)
+        # 存在滚动条且可以垂直滚动
+        if scroll is not None and scroll.VerticallyScrollable:
+            scroll.SetScrollPercent(horizontalPercent=0, verticalPercent=0)
+            # 先一滚到底，看看隐藏区域占比多少
+            scroll.SetScrollPercent(horizontalPercent=0, verticalPercent=1)
+            hidd_percent=scroll.VerticalScrollPercent #隐藏区域占比
+            show_percent=1-hidd_percent # 可见区域占比
+            # 滚回顶部
+            scroll.SetScrollPercent(horizontalPercent=0, verticalPercent=0)
+        # 开始获取会话列表
+        # print(hidd_percent,show_percent,hidd_percent/show_percent,math.ceil(hidd_percent/show_percent))
+        # print(scroll.VerticallyScrollable, scroll.VerticalScrollPercent, scroll.VerticalViewSize)
+        # 计算垂直滚动条要向下滚动的次数
+        s_i=math.ceil(hidd_percent/show_percent)
+        print(s_i)
+        session_list = []
+        session_names=[]
+        item=self.SessionList.ListItemControl()
+        for i in range(s_i+1):
+            list0 = self.SessionList.GetChildren()
+            if list0 is not None:
+                for item in list0:
+                    if item.Name in session_names:
+                        continue
+                    session=self.get_session_info(item)
+                    if session is not None:
+                        session_list.append(session)
+                        session_names.append(item.Name)
+            # 滚动
+            # print(i,scroll.VerticalScrollPercent,i*show_percent)
+            if scroll is not None and scroll.VerticalScrollPercent<1:
+                scroll.SetScrollPercent(horizontalPercent=0, verticalPercent=(i+1)*show_percent,waitTime=1)
+        # 滚回顶部
+        scroll.SetScrollPercent(horizontalPercent=0, verticalPercent=0)
         return session_list
 
     def search(self, keyword):
@@ -95,7 +174,7 @@ class WeChat:
         # 先从现有会话中找
         btn=self.SessionList.ButtonControl(Name=session_name)
         if btn.Exists(maxSearchSeconds=0):
-            btn.Click(waitTime=0.1)
+            btn.Click(waitTime=0.1,simulateMove=False)
         else:
             self.search(session_name)
 
@@ -122,7 +201,7 @@ class WeChat:
                 return
             btn_close = tab.ButtonControl(Name='关闭')
             if btn_close.Exists(maxSearchSeconds=2):
-                btn_close.Click()
+                btn_close.Click(simulateMove=False)
             return (title,url)
 
 
@@ -136,7 +215,7 @@ class WeChat:
             msg_sender = sender_btn.Name
         print(msg_content, msg_sender)
         if name=='[链接]':
-            listItem.ButtonControl(foundIndex=2).Click()
+            listItem.ButtonControl(foundIndex=2).Click(simulateMove=False)
             page_info=self.fetch_wx_pageInfo()
             if page_info is not None:
                 title,url=page_info
@@ -162,14 +241,17 @@ class WeChat:
 
 
 if __name__ == '__main__':
+    print(datetime.now().date())
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
     wx=WeChat()
     list=wx.get_session_list()
+    a=1
     for session in list:
-        print(session.__dict__)
+        print(a,session.__dict__)
+        a+=1
     print('')
-    wx.chat_with('Li')
-    wx.get_message_list()
+    # wx.chat_with('Li')
+    # wx.get_message_list()
     pass
 
 
