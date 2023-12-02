@@ -1,4 +1,6 @@
+import json
 import traceback
+import tools
 
 import uiautomation as auto
 import logging,math,os,queue,re,time
@@ -241,8 +243,31 @@ def send_msg(session_name,msg):
         edit.SendKeys('{Ctrl}v')
         edit.SendKeys('{Enter}')
         log.info(f'wx-send-msg: session={session_name} msg-length={len(msg)} content={msg}')
+        return True
     else:
         return False
+
+def send_file(session_name,file):
+    if not os.path.exists(file):
+        log.warning(f'指定的文件不存在: {file}')
+        return False
+    file_size = os.path.getsize(file)
+    wechat = __get_wx_win()
+    wechat.SetActive()
+    __search_session(wechat, session_name)
+    edit = wechat.EditControl(Name=session_name)
+    if edit.Exists():
+        tools.setClipboardFiles([file])
+        time.sleep(0.2)
+        edit.SendKeys('{Ctrl}a')
+        edit.SendKeys('{Ctrl}v')
+        if edit.GetValuePattern().Value:
+            edit.SendKeys('{Enter}')
+            log.info(f'wx-send-file: session={session_name} file-size={tools.filesize_exp(file_size)} file={file}')
+            return True
+    return False
+
+
 
 def get_session_list():
     wechat = __get_wx_win()
@@ -438,15 +463,20 @@ def test_5():
         print(f'start reply msg, mq_size={mq.qsize()}')
         for i in range(mq.qsize()):
             msg = mq.get_nowait()
-            json.encoder()
-            re_msg = f'reply for "{msg.MsgContentType} - {len(msg.MsgContent)}" by "{msg.Sender}" at {msg.MsgTime.strftime("%Y-%m-%d %H:%m")}'
+            jstr=json.dumps(msg.MsgContent)
+            re_msg = f'reply for "{msg.MsgContentType} - {len(jstr)}" by "{msg.Sender}" at {msg.MsgTime.strftime("%Y-%m-%d %H:%m")}'
             send_msg(msg.SessionName, re_msg)
         time.sleep(5)
     pass
+
+def test_6():
+    file=r"E:\myworking\myprojects\xiaohongshu_downloader\download\Xhs\videos\01e5594329b536aa010370038be4b08976_258.mp4"
+    send_file('Li',file)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s [%(name)s] [%(process)d] [%(thread)d] %(levelname)s - (%(funcName)s) -> %(message)s')
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    test_5()
+    test_6()
     pass
