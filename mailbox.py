@@ -14,8 +14,11 @@ from email.header import Header
 
 log=logging.getLogger()
 
-__MAIL_ACCOUNT="409297393@qq.com"
-__MAIL_PWD="cxtemjxqfduobggc"
+# __MAIL_ACCOUNT="409297393@qq.com"
+# __MAIL_PWD="cxtemjxqfduobggc"
+
+__MAIL_ACCOUNT="normi666@qq.com"
+__MAIL_PWD='mbdgongyjlijcbhj'
 
 _MAIL_IMAP_SERVER="imap.qq.com"
 _MAIL_IMAP_PORT=993

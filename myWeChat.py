@@ -217,9 +217,9 @@ class WeChat:
         self.UiaAPI.SwitchToThisWindow()
         self.EditMsg = self.UiaAPI.EditControl(SubName=who)
         if clear:
-            self.EditMsg.SendKeys('{Ctrl}a', waitTime=0)
-        self.EditMsg.SendKeys(msg, waitTime=0)
-        self.EditMsg.SendKeys('{Enter}', waitTime=0)
+            self.EditMsg.SendKeys('{Ctrl}a', waitTime=0.1)
+        self.EditMsg.SendKeys(msg, waitTime=0.1)
+        self.EditMsg.SendKeys('{Enter}', waitTime=0.1)
 
     def SendFiles(self, *filepath, not_exists='ignore'):
         """向当前聊天窗口发送文件
