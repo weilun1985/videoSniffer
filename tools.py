@@ -8,13 +8,32 @@ import win32gui
 import win32api
 import win32con
 import time,os
+import mylog
+import time
+from datetime import datetime
+from typing import Any
+
 
 
 QUEUE_THIEF_TASK='VideoSniffer:Thief_Task_Queue'
-QUEUE_WECHAT_SEND='VideoSniffer:WeChat_Send_Queue'
-QUEUE_MAILBOX_SEND='VideoSniffer:Mail_Send_Queue'
+QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:%s'
 
-redis_pool=redis.ConnectionPool(host='localhost',port='6379')
+redis_pool=redis.ConnectionPool(host='localhost',port='6379',decode_responses=True)
+
+def get_redis():
+    redis_conn = redis.Redis(connection_pool=redis_pool)
+    return redis_conn
+
+def get_logger():
+    return mylog.get_logger()
+
+class MyJsonEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o,datetime):
+            return o.strftime('%Y%m%d%H%M%S')
+        else:
+            return super(MyJsonEncoder,self).default(o)
+
 
 def json_to_obj(json_str,obj_class):
     data = json.loads(json_str.strip('\t\r\n'))
@@ -22,9 +41,22 @@ def json_to_obj(json_str,obj_class):
     obj.__dict__=data
     return obj
 
+def simpleTimeStr(t:datetime):
+    if t is None:
+        return None
+    return t.strftime('%Y%m%d%H%M%S')
+
 def obj_to_json(obj)->str:
-    json_str=json.dumps(obj.__dict__)
-    return json_str
+    if obj is None:
+        return
+    try:
+        json_str=json.dumps(obj.__dict__)
+        return json_str
+    except Exception as e:
+        print(obj.__dict__)
+        get_logger().error(obj.__dict__)
+        raise e
+
 
 def filesize_exp(size:int)->str:
     file_size_mode = ['B', 'KB', 'MB', 'GB']
@@ -37,6 +69,14 @@ def filesize_exp(size:int)->str:
         size1=round(size1,1)
         file_size_str=f'{size1}{file_size_mode[i]}'
     return file_size_str
+
+
+
+
+def aa():
+    redis=get_redis()
+    redis.lpush()
+    redis.rpop()
 
 from ctypes import (
     Structure,

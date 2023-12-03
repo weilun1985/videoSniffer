@@ -11,6 +11,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
+from models import MailInfo
 
 log=logging.getLogger()
 
@@ -27,17 +28,7 @@ _MAIL_SMTP_SERVER='smtp.qq.com'
 _MAIL_SMTP_PORT=465
 
 
-class MailInfo:
-    def __init__(self):
-        self.mail_id=None
-        self.subject=None
-        self.from_name=None
-        self.from_mail=None
-        self.mail_date=None
-        self.mail_time=None
-        self.text_content=None
-        self.html_content=None
-        self.files=[]
+
 
 def select_mails():
     mails = []
