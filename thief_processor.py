@@ -51,15 +51,28 @@ def thief_go(thief,from_msg):
             file_size = os.stat(itm).st_size
             t_size += file_size
             files.append({'path': itm, 'size': file_size, 'url': res_url})
-    content += f'\r\n找到{len(files)}个文件，共计{tools.filesize_exp(t_size)}。'
-    if len(files) > 0:
-        for i in range(len(files)):
-            content += f"\r\n{i + 1}. {files[i]['url']}"
-        if t_size > 50 * 1024 * 1024:  # 50MB附件
-            content += f'\r\n附件过大无法发送，请拷贝上面的URL在浏览器中打开自行下载'
+    content += f'\r\n\r\n找到{len(files)}个文件，共计{tools.filesize_exp(t_size)}。'
+    a,file_paths=0,[]
+    for item in files:
+        path=item.get('path')
+        size=item.get('size')
+        url=item.get('url')
+        if size > 50 * 1024 * 1024:
+            if a==0:
+                content += f'\r\n以下文件由于过大无法发送，请拷贝下面的URL在浏览器中打开自行下载：'
+            content += f"\r\n{a + 1}. {url}"
         else:
-            content += f'\r\n相关资源在附件中，请查收'
-    send_reply(from_msg,f'{subject}\r\n{content}',files)
+            file_paths.append(path)
+
+    # if len(files) > 0:
+    #     for i in range(len(files)):
+    #         content += f"\r\n{i + 1}. {files[i]['url']}"
+    #     if t_size > 50 * 1024 * 1024:  # 50MB附件
+    #         content += f'\r\n附件过大无法发送，请拷贝上面的URL在浏览器中打开自行下载'
+    #     else:
+    #         content += f'\r\n相关资源在附件中，请查收'
+
+    send_reply(from_msg,f'{content}',file_paths)
 
 def send_reply(from_message,reply,fiels=None):
     if isinstance(from_message,WeChatMessageInfo):
@@ -84,6 +97,7 @@ def do_task(task):
         try:
             thief_go(thief,body)
         except Exception as e:
+            log.error(e,exc_info=True)
             reply=f'哎呀呀，不好意思我出问题了，需要休息一下，请您稍后再试。'
             send_reply(body,reply)
     else:

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import math
 
@@ -139,3 +140,10 @@ def setClipboardFiles(paths):
                 win32clipboard.CloseClipboard()
             except:
                 pass
+
+def md5_str(instr:str):
+    data=instr.encode()
+    md5 = hashlib.md5()
+    md5.update(data)
+    md5str=md5.hexdigest()
+    return md5str

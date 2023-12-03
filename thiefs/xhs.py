@@ -2,6 +2,8 @@
 import datetime
 import re,os,logging
 import requests
+
+import tools
 from thiefs.thiefBase import ThiefBase,VideoInfo,PictureInfo
 from playwright.sync_api import sync_playwright
 
@@ -28,7 +30,8 @@ def get_page(url):
 class Xhs(ThiefBase):
 
      def target_id(self):
-         return os.path.basename(self.target_url)
+        return tools.md5_str(self.target_url)
+        # return os.path.basename(self.target_url)
 
      def fetch(self)->(VideoInfo|PictureInfo,bytes|list[bytes]):
         url = self.target_url
