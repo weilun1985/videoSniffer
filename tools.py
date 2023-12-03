@@ -1,7 +1,9 @@
+# pip install jmespath
+
 import hashlib
 import json
 import math
-
+import jmespath
 import redis
 import win32clipboard
 import win32process
@@ -147,3 +149,18 @@ def md5_str(instr:str):
     md5.update(data)
     md5str=md5.hexdigest()
     return md5str
+
+def json_select(query,data):
+    result=jmespath.search(query,data)
+    return result
+
+def is_empty_str(instr:str):
+    if str is None:
+        return True
+    instr=instr.strip()
+    if len(instr)==0:
+        return True
+    return False
+
+def not_empty_str(instr:str):
+    return not is_empty_str(instr)

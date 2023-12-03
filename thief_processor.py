@@ -1,13 +1,15 @@
 import os
 import time
+import typing
+
 import tools
 import models
 import message_center
 import re
 from thiefs.thiefBase import ThiefBase
-from thiefs.xhs import Xhs
+from thiefs.xhs_v2 import Xhs
 from datetime import datetime
-from models import WeChatMessageInfo,WeChatSendInfo,MailInfo
+from models import WeChatMessageInfo,MailInfo,VideoInfo,PictureInfo,ResInfo
 
 log=tools.get_logger()
 
@@ -31,48 +33,29 @@ def thief_route(shared_text)->ThiefBase|None:
     return thief
 
 def thief_go(thief,from_msg):
-    info= thief.go()
+    info:ResInfo= thief.go()
     if info is None:
+        send_reply(from_msg,'不好意思啊，小的无能，没能找到您要的资源。我已经记录下来了，尽快学会寻找这类资源。')
+        log.warning(f'未能获取倒指定资源：{thief.name} {thief.target_url}')
         return
-    subject=f'Re:{info.name}'
-    content=info.content
-    files=[]
-    m1=info.__dict__.get('res_file')
-    m2=info.__dict__.get('res_file_list')
-    t_size = 0
-    if m1 is not None:
-        file_size = os.stat(m1).st_size
-        t_size += file_size
-        files.append({'path': m1, 'size': file_size, 'url': info.res_url})
-    elif m2 is not None:
-        for i in range(len(m2)):
-            itm = m2[i]
-            res_url = info.res_url_list[i]
-            file_size = os.stat(itm).st_size
-            t_size += file_size
-            files.append({'path': itm, 'size': file_size, 'url': res_url})
-    content += f'\r\n\r\n找到{len(files)}个文件，共计{tools.filesize_exp(t_size)}。'
-    a,file_paths=0,[]
-    for item in files:
-        path=item.get('path')
-        size=item.get('size')
-        url=item.get('url')
-        if size > 50 * 1024 * 1024:
-            if a==0:
-                content += f'\r\n以下文件由于过大无法发送，请拷贝下面的URL在浏览器中打开自行下载：'
-            content += f"\r\n{a + 1}. {url}"
-        else:
-            file_paths.append(path)
-
-    # if len(files) > 0:
-    #     for i in range(len(files)):
-    #         content += f"\r\n{i + 1}. {files[i]['url']}"
-    #     if t_size > 50 * 1024 * 1024:  # 50MB附件
-    #         content += f'\r\n附件过大无法发送，请拷贝上面的URL在浏览器中打开自行下载'
-    #     else:
-    #         content += f'\r\n相关资源在附件中，请查收'
-
-    send_reply(from_msg,f'{content}',file_paths)
+    content=''
+    if isinstance(info,VideoInfo):
+        content+=f'为您找到1个视频： \r\n1. {info.res_url}'
+    elif isinstance(info,PictureInfo):
+        content+=f'为您找到{len(info.res_url_list)}张图片：'
+        for i in range(len(info.res_url_list)):
+            content+=f'\r\n{i+1}. {info.res_url_list[i]}'
+    if tools.not_empty_str(info.name) or tools.not_empty_str(info.content):
+        content+=f'\r\n\r\n同时帮您取到了更多的信息如下：'
+        a=1
+        if tools.not_empty_str(info.name):
+            content += f'\r\n{a}. 标题：\r\n{info.name}'
+            a+=1
+        if tools.not_empty_str(info.content):
+            content += f'\r\n{a}. 描述：\r\n{info.content}'
+            a+=1
+    content+='\r\n\r\n由于目前系统还未完善，所以需要请您拷贝上面的资源链接粘贴到浏览器中打开后手工下载。程序哥哥正在加紧开发中，为您带来的不便请见谅。。。'
+    send_reply(from_msg,content,None)
 
 def send_reply(from_message,reply,fiels=None):
     if isinstance(from_message,WeChatMessageInfo):
@@ -83,10 +66,14 @@ def do_task(task):
     shared_text = None
     body=task.MessageBody
     if isinstance(body,WeChatMessageInfo):
-        if body.MsgContentType=='文本':
-            shared_text=body.MsgContent
-        elif body.MsgContentType=='链接':
-            shared_text=body.MsgContent.get('url')
+        content=body.MsgContent
+        if isinstance(content,str):
+            shared_text=content
+        elif isinstance(content,typing.Dict):
+            shared_text=content.get('url')
+        elif isinstance(content,typing.List):
+            shared_text=' '.join(content)
+
     elif isinstance(body,MailInfo):
         pass
 

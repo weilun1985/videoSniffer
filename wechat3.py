@@ -7,11 +7,11 @@ import logging,math,os,queue,re,time
 from uiautomation import WindowControl,ListControl,ButtonControl,TextControl,EditControl,ListItemControl,DocumentControl,PropertyId
 from datetime import datetime,timedelta
 from typing import List,Any
-from models import WeChatMessageInfo,WeChatSessionInfo
+from models import WeChatMessageInfo,WeChatSessionInfo,FileTooLargeException
 
 log=tools.get_logger()
 
-
+WECHAT_MAX_FILE_SIZE=50*1024*1024
 class WeChatUtil:
     @staticmethod
     def name_to_date_str(today:datetime, name):
@@ -114,7 +114,7 @@ class WeChatUtil:
     def parse_link_msg(msg_info:WeChatMessageInfo):
         remark = f'sender={msg_info.Sender}'
         if msg_info.MsgContent is not None:
-            summary = ''.join(msg_info.MsgContent)
+            summary = '\r\n'.join(msg_info.MsgContent)
         msg_content={'summary':summary}
         got, obj= WeChatUtil.fetch_page_info(remark)
         if got:
@@ -158,7 +158,7 @@ class WeChatUtil:
                     btn_max_area=area
                     btn_main=btn
 
-        msg_content = []
+        msg_content = [name]
         for n in range(1,5):
             txc = rect_main.TextControl(foundIndex=n)
             if txc.Exists(maxSearchSeconds=0):
@@ -168,29 +168,40 @@ class WeChatUtil:
         msg_info.Sender=sender_btn.Name
         msg_info.MsgContent=msg_content
 
-        if name=='[链接]':
-            msg_info.MsgContentType = '链接'
+
+        if btn_main is not None:
             btn_main.Click(simulateMove=False)
             WeChatUtil.parse_link_msg(msg_info)
-        elif name=='[视频]':
-            msg_info.MsgContentType = '视频'
-            pass
-        elif name=='[图片]':
-            msg_info.MsgContentType = '图片'
-            pass
-        elif name == '[文件]':
-            msg_info.MsgContentType = '文件'
-            pass
-        elif name =='[动画表情]':
-            msg_info.MsgContentType = '动画表情'
-            pass
-        elif name == '[音乐]':
-            msg_info.MsgContentType = '音乐'
-            pass
+        match=re.match('^\[([\u4e00-\u9fa5]{2,5})\]$',name)
+        if match is not None:
+            msg_info.MsgContentType=match.group(1)
         else:
             msg_info.MsgContentType = '文本'
-            msg_info.MsgContent=' '.join(msg_content)
-            msg_info.MsgFullGet=True
+            msg_info.MsgContent = '\r\n'.join(msg_content)
+            msg_info.MsgFullGet = True
+        # if name=='[链接]':
+        #     msg_info.MsgContentType = '链接'
+        #     btn_main.Click(simulateMove=False)
+        #     WeChatUtil.parse_link_msg(msg_info)
+        # elif name=='[视频]':
+        #     msg_info.MsgContentType = '视频'
+        #     pass
+        # elif name=='[图片]':
+        #     msg_info.MsgContentType = '图片'
+        #     pass
+        # elif name == '[文件]':
+        #     msg_info.MsgContentType = '文件'
+        #     pass
+        # elif name =='[动画表情]':
+        #     msg_info.MsgContentType = '动画表情'
+        #     pass
+        # elif name == '[音乐]':
+        #     msg_info.MsgContentType = '音乐'
+        #     pass
+        # else:
+        #     msg_info.MsgContentType = '文本'
+        #     msg_info.MsgContent=' '.join(msg_content)
+        #     msg_info.MsgFullGet=True
         name1=name.replace('\n',' ')
         log.info(
             f'fetch-msg: sender={msg_info.Sender} topic={name1} full-get={msg_info.MsgFullGet} btn-main-found:{btn_main != None} {btn_main.BoundingRectangle if btn_main != None else None} content:{msg_content}')
@@ -249,6 +260,8 @@ def send_file(session_name,file):
         log.warning(f'指定的文件不存在: {file}')
         return False
     file_size = os.path.getsize(file)
+    if file_size>WECHAT_MAX_FILE_SIZE:
+        raise FileTooLargeException
     wechat = __get_wx_win()
     wechat.SetActive()
     __search_session(wechat, session_name)
