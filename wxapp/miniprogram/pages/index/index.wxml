@@ -1,0 +1,34 @@
+<!--index.wxml-->
+<view class="container">
+    <block wx:if="{{video}}">
+        <video class="video" src="{{video.url}}"></video>
+        <textarea class="info" data-show='yes' value=" {{info}}"></textarea>
+        <view class="button_area">
+            <view class="button_copy_link" bind:tap="copyLink">复制链接</view> 
+            <view class="button_save" bind:tap="download">保存到相册</view>
+        </view>
+        <view class="progress-box">
+            <progress percent="{{savePercent}}" show-info stroke-width="3"/>
+        </view>
+        <view class="tip">如果无法保存，请点击“复制链接”，粘贴到手机浏览器进行下载。</view>
+    </block>
+    <block wx:elif="{{image}}">     
+        <view class="swiper-container">
+            <swiper indicator-dots="true" autoplay="true" interval="3000" duration="800" circular="true" current="{{swiperCurrent}}" bind:change="swiperChange" class="swiper"> 
+            <block wx:for="{{image.urls}}" wx:key="unique">
+                <swiper-item>
+                <image src="{{item}}" class="img" bind:tap="swipclick" mode="heightFix" />
+                </swiper-item>
+            </block>
+            </swiper>
+        </view>
+        <textarea class="info" data-show='yes' value=" {{info}}"></textarea>
+        <view class="button_area">
+            <view class="button_save" bind:tap="download">保存到相册</view>
+        </view>
+        <view class="progress-box">
+            <progress percent="{{savePercent}}" show-info stroke-width="3"/>
+        </view>
+        <view class="tip">找到共计 {{image.urls.length}} 张图片</view>
+    </block>
+</view> 

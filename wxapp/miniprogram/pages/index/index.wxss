@@ -1,0 +1,100 @@
+/**index.wxss**/
+
+page {
+  padding-top: 54rpx;
+  background-color: #f6f6f6;
+  padding-bottom: 60rpx;
+}
+.container{
+    width: 100%;
+}
+.title {
+  font-family: PingFang SC;
+  font-weight: 500;
+  color: #000000;
+  font-size: 44rpx;
+  margin-bottom: 40rpx;
+}
+.info{
+    font-size: 30rpx;
+    font-family: PingFang SC;
+    color: #000000;
+    margin-top: 15rpx;
+    margin-bottom: 10rpx;
+    height: 250rpx;
+    width: 95%;
+}
+.progress-box{
+    width: 95%;
+}
+progress {margin: 10px;}
+.video{
+    width: 100%;
+    height: 500rpx;
+}
+.tip {
+    font-size: 23rpx;
+    color: rgba(0, 0, 0, 0.5);
+    width: 90%;
+    text-align: center;
+    margin: 30rpx auto 0 auto;
+  }
+
+.top_tip {
+  font-size: 28rpx;
+  font-family: PingFang SC;
+  font-weight: 400;
+  color: #888888;
+  margin-bottom: 28rpx;
+}
+
+.button_area{
+    margin-top: 40rpx;
+    text-align: center;
+}
+
+.button_copy_link {
+    width: 200rpx;
+    text-align: center;
+    height: 80rpx;
+    color: white;
+    border-radius: 5rpx;
+    line-height: 80rpx;
+    background-color: #9ea5a2;
+    float: left;
+  }
+
+.button_save {
+    width: 300rpx;
+    text-align: center;
+    height: 80rpx;
+    color: white;
+    border-radius: 5rpx;
+    line-height: 80rpx;
+    background-color: #07c160;
+    float: right;
+    margin-left: 40rpx;
+  }
+
+/* swiper {
+    height: 100%;
+} */
+/* swiper-item image {
+    width: 100%;
+    height: 100%;
+} */
+.swiper-container{
+    width: 100%;
+}
+.swiper-container .swiper{
+    height: 500rpx;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    background-color: #080808;
+}
+.swiper-container .swiper .img{
+  width: 100%;
+  height: 100%;
+}
+

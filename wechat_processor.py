@@ -18,15 +18,16 @@ def msg_handler(session,msg):
 def run():
     log.info(f'WeChat Processor Start At: {tools.simpleTimeStr(datetime.now())}')
     while True:
-        me = wechat3.me_is_who()
-        # 检测新消息
         try:
+            me = wechat3.me_is_who()
+            # 检测新消息
             # log.info('start check new msg...')
             a,b=wechat3.check_new_msg(msg_handler)
             if a>0:
                 log.info(f'check new msg compleate, receive={a}, got={b}')
         except Exception as e:
             log.error(e,exc_info=True)
+            time.sleep(0.1)
 
         # 检测完成后，进行消息发送
         # log.info('start check need sends...')
