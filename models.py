@@ -103,22 +103,22 @@ class PictureInfo(ResInfo):
         self.res_url_list = []
         self.res_file_list=[]
 
-class ResIndexInfo:
+class ResInfoForApi:
     def __init__(self):
         self.id=None
         self.title=None
         self.descp=None
         self.video=None
         self.image=None
-        self.res_downloaded: bool = False
+        # self.res_downloaded: bool = False
 
     @staticmethod
     def parse(res:ResInfo):
-        index_info=ResIndexInfo()
+        index_info=ResInfoForApi()
         index_info.id=res.id
         index_info.title=res.name
         index_info.descp=res.content
-        index_info.res_downloaded=res.res_downloaded
+        # index_info.res_downloaded=res.res_downloaded
         index_info.res_type=res.res_type
         if isinstance(res,VideoInfo):
             index_info.video={'url':res.res_url}

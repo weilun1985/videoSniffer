@@ -87,6 +87,7 @@ class ThiefBase(metaclass=abc.ABCMeta):
         self.log.info(f'save-file:{res_file_path} {int(len(data) / 1024)}KB')
 
     def save(self,info:VideoInfo|PictureInfo,data:bytes|list):
+        info.id=self.target_id()
         if not os.path.exists(self.download_picture_dir):
             os.makedirs(self.download_picture_dir)
             self.log.info('marke-dir: %s',self.download_picture_dir)

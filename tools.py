@@ -5,9 +5,6 @@ import json
 import math
 import jmespath
 import redis
-import win32clipboard
-import win32con
-import time,os
 import mylog
 from datetime import datetime
 from typing import Any
@@ -52,11 +49,13 @@ def obj_to_json(obj)->str:
     if obj is None:
         return
     try:
-        json_str=json.dumps(obj.__dict__)
+        if not isinstance(obj, type) and not isinstance(obj, dict):
+            json_str=json.dumps(obj)
+        else:
+            json_str=json.dumps(obj.__dict__)
         return json_str
     except Exception as e:
-        print(obj.__dict__)
-        get_logger().error(obj.__dict__)
+        get_logger().error(f'对象转JSON失败：{type(obj)}',exc_info=True)
         raise e
 
 
@@ -72,68 +71,6 @@ def filesize_exp(size:int)->str:
         file_size_str=f'{size1}{file_size_mode[i]}'
     return file_size_str
 
-
-from ctypes import (
-    Structure,
-    c_uint,
-    c_long,
-    c_int,
-    c_bool,
-    sizeof
-)
-class DROPFILES(Structure):
-    _fields_ = [
-    ("pFiles", c_uint),
-    ("x", c_long),
-    ("y", c_long),
-    ("fNC", c_int),
-    ("fWide", c_bool),
-    ]
-pDropFiles = DROPFILES()
-pDropFiles.pFiles = sizeof(DROPFILES)
-pDropFiles.fWide = True
-matedata = bytes(pDropFiles)
-
-def setClipboardText(text):
-    t0 = time.time()
-    while True:
-        if time.time() - t0 > 10:
-            raise TimeoutError(f"设置剪贴板超时！ --> {text}")
-        try:
-            win32clipboard.OpenClipboard()
-            win32clipboard.EmptyClipboard()
-            win32clipboard.SetClipboardData(win32con.CF_UNICODETEXT, text)
-            break
-        except:
-            pass
-        finally:
-            try:
-                win32clipboard.CloseClipboard()
-            except:
-                pass
-
-def setClipboardFiles(paths):
-    for file in paths:
-        if not os.path.exists(file):
-            raise FileNotFoundError(f"file ({file}) not exists!")
-    files = ("\0".join(paths)).replace("/", "\\")
-    data = files.encode("U16")[2:]+b"\0\0"
-    t0 = time.time()
-    while True:
-        if time.time() - t0 > 10:
-            raise TimeoutError(f"设置剪贴板文件超时！ --> {paths}")
-        try:
-            win32clipboard.OpenClipboard()
-            win32clipboard.EmptyClipboard()
-            win32clipboard.SetClipboardData(win32clipboard.CF_HDROP, matedata+data)
-            break
-        except:
-            pass
-        finally:
-            try:
-                win32clipboard.CloseClipboard()
-            except:
-                pass
 
 def md5_str(instr:str):
     data=instr.encode()

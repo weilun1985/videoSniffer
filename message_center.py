@@ -1,3 +1,4 @@
+import models
 import tools
 from models import MailInfo,WeChatMessageInfo,WeChatSendInfo,MailSendInfo,ChannelType,ThiefTaskInfo
 from datetime import datetime
@@ -89,14 +90,36 @@ def wechatSend(me,to,content,files=None):
     pushSendTask(msg)
 
 def getResInfoFromRedis(id):
+    if id is None:
+        raise Exception('检索-资源索引信息的ID不能为空！')
     key = tools.SET_RES_INFO.format(id)
     redis = tools.get_redis()
     value = redis.get(key)
     if value is None:
         return None
-    obj=tools.json_to_obj(value)
-    return obj
+    obj0=tools.json_to_obj(value)
+    info=obj0
+    if obj0['res_type']=='video':
+        info=models.VideoInfo()
+        info.__dict__=obj0
+    elif obj0['res_type']=='picture':
+        info = models.PictureInfo()
+        info.__dict__ = obj0
+    return info
 
-def setResInfoToRedis(id,resInfo):
+def setResInfoToRedis(info):
+    id=info.id
+    if id is None:
+        raise Exception(f'保存-资源索引信息的ID不能为空！ info={info.__dict__}')
+    key = tools.SET_RES_INFO.format(id)
+    redis = tools.get_redis()
+    jstr=tools.obj_to_json(info)
+    log.info(f'set resInfo to redis: id={id}')
+    redis.set(key,jstr)
 
-    pass
+def getResInfo4Api(id):
+    resInfo=getResInfoFromRedis(id)
+    if resInfo is None:
+        return
+    apiInfo=models.ResInfoForApi.parse(resInfo)
+    return apiInfo

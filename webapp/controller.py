@@ -1,4 +1,6 @@
 import json,logging
+import typing
+import message_center
 from sanic import response,request,Blueprint
 from sanic.log import logger
 from sanic_ext import cors
@@ -8,10 +10,9 @@ controller_bp=Blueprint('sniffer_web_controller')
 @controller_bp.route("/res",methods =['GET'])
 @cors(origin='*')
 async def res(request: request.Request):
-    request.args.get('id')
-    logger.info(f"load res: id={id}")
-    data={}
-    
+    id=request.args.get('id')
+    logger.info(f"found res: id={id}")
+    data=message_center.getResInfo4Api(id)
     return wrapper_json(data,None)
 
 @controller_bp.route("/reslist",methods =['GET'])
@@ -29,6 +30,9 @@ def wrapper_json(data,exception):
         result["success"]=False
         result["errmsg"]=exception
     else:
-        result["data"]=data
+        if not isinstance(data,type) and not isinstance(data,dict):
+            result["data"]=data.__dict__
+        else:
+            result["data"]=data
     return response.json(body=result)
 

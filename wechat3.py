@@ -2,6 +2,7 @@ import json
 import typing
 
 import tools
+import wintools
 import uiautomation as auto
 import logging,math,os,queue,re,time
 from uiautomation import WindowControl,ListControl,ButtonControl,TextControl,EditControl,ListItemControl,DocumentControl,PropertyId
@@ -267,7 +268,7 @@ def send_file(session_name,file):
     __search_session(wechat, session_name)
     edit = wechat.EditControl(Name=session_name)
     if edit.Exists():
-        tools.setClipboardFiles([file])
+        wintools.setClipboardFiles([file])
         time.sleep(0.2)
         edit.SendKeys('{Ctrl}a')
         edit.SendKeys('{Ctrl}v')

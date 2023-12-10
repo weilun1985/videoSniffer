@@ -20,10 +20,12 @@ class Xhs(ThiefBase):
         res = requests.get(url, headers=headers, allow_redirects=False)
         html = res.text
         real_url = res.headers.get("location")
+        res.close()
         # print('\t', 'rel_url:', real_url)
         if real_url is not None:
             res2 = requests.get(real_url, headers=headers)
             html = res2.text
+            res2.close()
 
         match=re.search("window.__INITIAL_STATE__=(\{.+\})",html)
         if match is None:

@@ -50,7 +50,7 @@ Page({
           mask:true
         })
         wx.request({
-          url: 'https://1e63211h01.yicp.fun/res.json',
+          url: 'https://1e63211h01.yicp.fun/res?id=486846d69339a77cf6460b6ce74fe4b4',
           method:'GET',
           header:{'content-type':'application/json'},
           success:(res)=>{
