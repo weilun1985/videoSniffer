@@ -84,6 +84,7 @@ class FileTooLargeException(Exception):
 
 class ResInfo:
     def __init__(self):
+        self.id:str=None
         self.thief: str = None
         self.name: str = None
         self.content: str = None
@@ -91,22 +92,39 @@ class ResInfo:
         self.res_downloaded: bool = False
         self.res_type:str =None
 
+
 class VideoInfo(ResInfo):
     def  __init__(self):
-        # self.thief:str=None
-        # self.name:str=None
-        # self.content:str=None
-        # self.share_url:str=None
-        # self.res_downloaded: bool = False
         self.res_url:str=None
         self.res_file:str=None
 
 class PictureInfo(ResInfo):
     def __init__(self):
-        # self.thief: str = None
-        # self.name: str = None
-        # self.content: str = None
-        # self.share_url: str = None
-        # self.res_downloaded: bool = False
         self.res_url_list = []
         self.res_file_list=[]
+
+class ResIndexInfo:
+    def __init__(self):
+        self.id=None
+        self.title=None
+        self.descp=None
+        self.video=None
+        self.image=None
+        self.res_downloaded: bool = False
+
+    @staticmethod
+    def parse(res:ResInfo):
+        index_info=ResIndexInfo()
+        index_info.id=res.id
+        index_info.title=res.name
+        index_info.descp=res.content
+        index_info.res_downloaded=res.res_downloaded
+        index_info.res_type=res.res_type
+        if isinstance(res,VideoInfo):
+            index_info.video={'url':res.res_url}
+        elif isinstance(res,PictureInfo):
+            urls=[]
+            for url in res.res_url_list:
+                urls.append(url)
+            index_info.image={'urls':urls}
+        return index_info

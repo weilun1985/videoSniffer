@@ -87,3 +87,16 @@ def wechatSend(me,to,content,files=None):
     msg.Content = content
     msg.Files=files
     pushSendTask(msg)
+
+def getResInfoFromRedis(id):
+    key = tools.SET_RES_INFO.format(id)
+    redis = tools.get_redis()
+    value = redis.get(key)
+    if value is None:
+        return None
+    obj=tools.json_to_obj(value)
+    return obj
+
+def setResInfoToRedis(id,resInfo):
+
+    pass

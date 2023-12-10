@@ -11,24 +11,24 @@ async def res(request: request.Request):
     request.args.get('id')
     logger.info(f"load res: id={id}")
     data={}
-    result=wrapper_api_json(data,None)
-    return response.json(body=result)
+    
+    return wrapper_json(data,None)
 
 @controller_bp.route("/reslist",methods =['GET'])
 @cors(origin='*')
 async def reslist(request: request.Request):
     logger.info(f"list all res")
     data={}
-    result=wrapper_api_json(data,None)
-    return response.json(body=result)
+
+    return wrapper_json(data,None)
 
 # 包装API结果JSON
-def wrapper_api_json(data,exception):
+def wrapper_json(data,exception):
     result = {"success": True, "data": None, "errmsg": None}
     if exception is not None:
         result["success"]=False
         result["errmsg"]=exception
     else:
         result["data"]=data
-    return result
+    return response.json(body=result)
 

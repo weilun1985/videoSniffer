@@ -6,20 +6,17 @@ import math
 import jmespath
 import redis
 import win32clipboard
-import win32process
-import win32gui
-import win32api
 import win32con
 import time,os
 import mylog
-import time
 from datetime import datetime
 from typing import Any
 
 
 
 QUEUE_THIEF_TASK='VideoSniffer:Thief_Task_Queue'
-QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:%s'
+QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:{}'
+SET_RES_INFO='VideoSniffer:Res_Info:{}'
 
 redis_pool=redis.ConnectionPool(host='192.168.31.162',port='6378',decode_responses=True)
 
@@ -38,8 +35,10 @@ class MyJsonEncoder(json.JSONEncoder):
             return super(MyJsonEncoder,self).default(o)
 
 
-def json_to_obj(json_str,obj_class):
+def json_to_obj(json_str,obj_class=None):
     data = json.loads(json_str.strip('\t\r\n'))
+    if obj_class is None:
+        return data
     obj=obj_class()
     obj.__dict__=data
     return obj
@@ -73,13 +72,6 @@ def filesize_exp(size:int)->str:
         file_size_str=f'{size1}{file_size_mode[i]}'
     return file_size_str
 
-
-
-
-def aa():
-    redis=get_redis()
-    redis.lpush()
-    redis.rpop()
 
 from ctypes import (
     Structure,
