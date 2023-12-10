@@ -31,4 +31,7 @@
         </view>
         <view class="tip">找到共计 {{image.urls.length}} 张图片</view>
     </block>
+    <block wx:else="">
+        <view>{{message?message:'资源加载中，请稍后'}}</view>
+    </block>
 </view> 
