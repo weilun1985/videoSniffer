@@ -21,6 +21,7 @@ Page({
         savePercent:0
     },
     onLoad:function(){
+        console.log('on load.');
         var info='';
         if(this.data.title){
             info+=this.data.title+'\r\n';
