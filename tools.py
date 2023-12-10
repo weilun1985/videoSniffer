@@ -21,7 +21,7 @@ from typing import Any
 QUEUE_THIEF_TASK='VideoSniffer:Thief_Task_Queue'
 QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:%s'
 
-redis_pool=redis.ConnectionPool(host='localhost',port='6379',decode_responses=True)
+redis_pool=redis.ConnectionPool(host='192.168.31.162',port='6378',decode_responses=True)
 
 def get_redis():
     redis_conn = redis.Redis(connection_pool=redis_pool)
