@@ -15,7 +15,7 @@ QUEUE_THIEF_TASK='VideoSniffer:Thief_Task_Queue'
 QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:{}'
 SET_RES_INFO='VideoSniffer:Res_Info:{}'
 
-redis_pool=redis.ConnectionPool(host='192.168.31.162',port='6378',decode_responses=True)
+redis_pool=redis.ConnectionPool(host='192.168.31.162',port='6378',decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
 
 def get_redis():
     redis_conn = redis.Redis(connection_pool=redis_pool)

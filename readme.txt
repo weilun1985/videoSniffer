@@ -21,4 +21,12 @@ trusted-host = https://pypi.tuna.tsinghua.edu.cn
 # pip install colorlog
 
 2）playWright相关：
+# pip install playwright
+# playwright install
+
+3、运行webApp:
+nohup python application.py &
+tail -f nohup.out
+
+
 
