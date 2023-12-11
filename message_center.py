@@ -123,3 +123,14 @@ def getResInfo4Api(id):
         return
     apiInfo=models.ResInfoForApi.parse(resInfo)
     return apiInfo
+
+def listResInfoIds():
+    key_patten=tools.SET_RES_INFO.format('*')
+    key_prex=tools.SET_RES_INFO.format('')
+    redis = tools.get_redis()
+    key_list=redis.keys(key_patten)
+    list=[]
+    for key in key_list:
+        id=key[len(key_prex):]
+        list.append(id)
+    return list

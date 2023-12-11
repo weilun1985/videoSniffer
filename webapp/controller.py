@@ -19,9 +19,10 @@ async def res(request: request.Request):
 @cors(origin='*')
 async def reslist(request: request.Request):
     logger.info(f"list all res")
-    data={}
-
+    data=message_center.listResInfoIds()
     return wrapper_json(data,None)
+
+
 
 # 包装API结果JSON
 def wrapper_json(data,exception):
@@ -30,7 +31,7 @@ def wrapper_json(data,exception):
         result["success"]=False
         result["errmsg"]=exception
     else:
-        if not isinstance(data,type) and not isinstance(data,dict):
+        if hasattr(data,'__dict__'):
             result["data"]=data.__dict__
         else:
             result["data"]=data

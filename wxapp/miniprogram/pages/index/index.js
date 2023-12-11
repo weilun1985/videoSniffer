@@ -65,6 +65,21 @@ Page({
                     info+=data.descp;
                 }
                 data.info=info;
+                if(data.res_type==='video'){
+                    let url=data.video.url;
+                    if(url.startsWith('http://')){
+                        url=url.replace('http://','https://');
+                        data.video.url=url;
+                    }
+                }else if(data.res_type==='picture'){
+                    for(let i=0;i<data.image.urls.length;i++){
+                        let url=data.image.urls[i];
+                        if(url.startsWith('http://')){
+                            url=url.replace('http://','https://');
+                            data.image.urls[i]=url;
+                        }
+                    }
+                }
                 this.setData(data);
                 // console.dir(data);
               }else{
