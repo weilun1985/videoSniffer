@@ -6,16 +6,32 @@ import math
 import jmespath
 import redis
 import mylog
+import socket
 from datetime import datetime
 from typing import Any
 
+
+def get_host_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+    return ip
 
 
 QUEUE_THIEF_TASK='VideoSniffer:Thief_Task_Queue'
 QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:{}'
 SET_RES_INFO='VideoSniffer:Res_Info:{}'
 
-redis_pool=redis.ConnectionPool(host='192.168.31.162',port='6378',decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
+HOST_REDIS='192.168.31.162'
+PORT_REDIS=6378
+HOST_IP=get_host_ip()
+
+redis_pool=redis.ConnectionPool(host=('localhost')if(get_host_ip()==HOST_REDIS)else HOST_REDIS,port=PORT_REDIS,decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
+
+
 
 def get_redis():
     redis_conn = redis.Redis(connection_pool=redis_pool)
@@ -49,10 +65,10 @@ def obj_to_json(obj)->str:
     if obj is None:
         return
     try:
-        if not isinstance(obj, type) and not isinstance(obj, dict):
-            json_str=json.dumps(obj)
+        if hasattr(obj,'__dict__'):
+            json_str = json.dumps(obj.__dict__)
         else:
-            json_str=json.dumps(obj.__dict__)
+            json_str = json.dumps(obj)
         return json_str
     except Exception as e:
         get_logger().error(f'对象转JSON失败：{type(obj)}',exc_info=True)
@@ -93,3 +109,8 @@ def is_empty_str(instr:str):
 
 def not_empty_str(instr:str):
     return not is_empty_str(instr)
+
+
+if __name__ == '__main__':
+    print(get_host_ip())
+    print(get_redis().info())

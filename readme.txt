@@ -27,6 +27,8 @@ trusted-host = https://pypi.tuna.tsinghua.edu.cn
 3、运行webApp:
 nohup python application.py &
 tail -f nohup.out
+查进程： ps -ef | grep python
+杀进程：
 
 
 
