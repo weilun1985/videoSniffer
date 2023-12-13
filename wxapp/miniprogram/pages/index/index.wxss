@@ -63,8 +63,7 @@ progress {margin: 10px;}
     background-color: #9ea5a2;
     float: left;
   }
-
-.button_save {
+.button{
     width: 300rpx;
     text-align: center;
     height: 80rpx;
@@ -72,17 +71,19 @@ progress {margin: 10px;}
     border-radius: 5rpx;
     line-height: 80rpx;
     background-color: #07c160;
+}
+
+.button .right {
     float: right;
     margin-left: 40rpx;
-  }
+}
 
-/* swiper {
-    height: 100%;
-} */
-/* swiper-item image {
-    width: 100%;
-    height: 100%;
-} */
+.resId_input{
+    border:solid 1px #888888;
+    width: 98%;
+    height: 300rpx;
+}
+
 .swiper-container{
     width: 100%;
 }
