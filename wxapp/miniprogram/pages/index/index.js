@@ -93,7 +93,6 @@ Page({
                         console.debug(url);
                         if(url.startsWith('http://')){
                             url=url.replace('http://','https://');
-                            
                             data.image.urls[i]=url;
                         }
                     }
@@ -115,9 +114,9 @@ Page({
     },
     download() {
         if(this.data.video){
-            downloadFile('video', this.data.video.url);
-        }else if(this.data.image&&this.data.image.urls.length>0){
-            downloadFiles('image',this.data.image.urls);
+            downloadFile('video', this.data.video.durl);
+        }else if(this.data.image&&this.data.image.durls.length>0){
+            downloadFiles('image',this.data.image.durls);
         }
     },
     copyLink() {

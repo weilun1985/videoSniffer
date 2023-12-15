@@ -36,6 +36,7 @@ async def after_server_start(app):
     logger.info(f"current work dir is: {current_work_dir}")
     logger.info(f'current file dir is: {current_file_dir}')
     logger.info(f'current web-view-template dir is: {web_template_dir}')
+    logger.info(f'current static dir is: {web_static_dir}')
     pass
 
 @app.after_reload_trigger
