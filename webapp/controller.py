@@ -2,7 +2,7 @@ import json,logging
 import os.path
 import typing
 import message_center
-import webapp.webUtils
+from webapp.webUtils import res_proxy
 from sanic import response,request,Blueprint
 from sanic.log import logger
 from sanic_ext import cors
@@ -34,7 +34,7 @@ async def resproxy(request: request.Request,res):
     arr=res2.split('_',2)
     id=arr[0]
     n=int(arr[1])
-    return await webUtils.res_proxy(id,n)
+    return await res_proxy(id,n)
 
 
 # 包装API结果JSON
