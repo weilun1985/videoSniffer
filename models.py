@@ -110,10 +110,11 @@ class ResInfoForApi:
         self.descp=None
         self.video=None
         self.image=None
-        # self.res_downloaded: bool = False
+
 
     @staticmethod
     def parse(res:ResInfo):
+        host="https://1e63211h01.yicp.fun/resproxy/"
         index_info=ResInfoForApi()
         index_info.id=res.id
         index_info.title=res.name
@@ -121,10 +122,20 @@ class ResInfoForApi:
         # index_info.res_downloaded=res.res_downloaded
         index_info.res_type=res.res_type
         if isinstance(res,VideoInfo):
-            index_info.video={'url':res.res_url}
+            index_info.video={
+                'url':res.res_url,
+                'durl':f'{host}{res.id}_0.mp4'
+            }
         elif isinstance(res,PictureInfo):
             urls=[]
+            durls=[]
+            a=0
             for url in res.res_url_list:
                 urls.append(url)
-            index_info.image={'urls':urls}
+                durls.append(f'{host}{res.id}_{a}.jpg')
+                a+=1
+            index_info.image={
+                'urls':urls,
+                'durls':durls
+            }
         return index_info

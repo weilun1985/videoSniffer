@@ -80,7 +80,7 @@ def filesize_exp(size:int)->str:
     file_size_str = f'{size}{file_size_mode[0]}'
     for i in range(1,len(file_size_mode)+1):
         size1=size/math.pow(1024,i)
-        print(i,size1)
+        # print(i,size1)
         if size1<1:
             break
         size1=round(size1,1)

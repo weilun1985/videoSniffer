@@ -1,9 +1,12 @@
 import json,logging
+import os.path
 import typing
 import message_center
+import webUtils
 from sanic import response,request,Blueprint
 from sanic.log import logger
 from sanic_ext import cors
+
 
 controller_bp=Blueprint('sniffer_web_controller')
 
@@ -22,6 +25,16 @@ async def reslist(request: request.Request):
     data=message_center.listResInfoIds()
     return wrapper_json(data,None)
 
+@controller_bp.route("/resproxy/<res:\w+_\d+\.\w+>",methods =['GET'])
+# @controller_bp.route("/resproxy/((?<res>\w+_\d+)\.(mp4|jpg))",methods =['GET'])
+@cors(origin='*')
+async def resproxy(request: request.Request,res):
+    logger.info(f'resproxy: {res}')
+    res2,ext=os.path.splitext(res)
+    arr=res2.split('_',2)
+    id=arr[0]
+    n=int(arr[1])
+    return await webUtils.res_proxy(id,n)
 
 
 # 包装API结果JSON

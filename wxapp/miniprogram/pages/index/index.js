@@ -1,5 +1,5 @@
 // index.js
-// const app = getApp()
+const app = getApp()
 const { envList } = require('../../envList.js');
 const { downloadFile, downloadFiles } = require('../../utils')
 
@@ -15,17 +15,28 @@ Page({
             this.loadResInfo(id);
         }
     },
+    resId_input_Blur(e){
+        this.setData({
+            id:e.detail.value
+        })
+        console.log('set-id:'+e.detail.value);
+    },
     submitResId(){
+        console.dir(this.data);
         var id=this.data.id;
         if(id&&id.length>0){
             console.log('To get res: '+id);
-            url= `/pages/index/index?id=${id}`
+            var url= `/pages/index/index?id=${id}`
             console.log(url)
             wx.redirectTo({
                 url: url,
             })
         }else{
             console.warn('no id');
+            wx.showToast({
+                title: '资源ID不能为空',
+                icon: 'none',
+            })
         }
     },
     //轮播图的切换事件
@@ -79,8 +90,10 @@ Page({
                 }else if(data.res_type==='picture'){
                     for(let i=0;i<data.image.urls.length;i++){
                         let url=data.image.urls[i];
+                        console.debug(url);
                         if(url.startsWith('http://')){
                             url=url.replace('http://','https://');
+                            
                             data.image.urls[i]=url;
                         }
                     }
@@ -121,21 +134,31 @@ Page({
           }
         })  
     },
-    onShareAppMessage() {
-        var title=this.data.title;
-        var path='/pages/index/index?resid='+this.data.id;
+    onShare(){
+        var title=app.title;
+        var path='/pages/index/index';
+        var descp=app.descp;
+        var imageUrl='https://1e63211h01.yicp.fun/static/logo.jpg';
+        if(this.data.id&&(this.data.video||this.data.image)){
+            title=this.data.title;
+            path='/pages/index/index?id='+this.data.id;
+            descp=this.data.descp;
+            if(this.data.res_type=='picture'){
+                imageUrl=this.data.image.urls[0];
+            }
+        }
         return {
             title: title,
             path: path,
-            imageUrl: 'http://example.com/share.jpg',
-            desc: '这是分享备注信息'
+            imageUrl: imageUrl,
+            desc: descp
         }
     },
+    onShareAppMessage() {
+        return this.onShare();
+    },
     onShareTimeline() {
-        return {
-            title: '分享到朋友圈标题',
-            imageUrl: '/image/share.jpg'
-        }
+       return this.onShare();
     },
     jumpPage(e) {
         wx.navigateTo({

@@ -73,7 +73,14 @@ progress {margin: 10px;}
     background-color: #07c160;
 }
 
-.button .right {
+.button_right {
+    width: 300rpx;
+    text-align: center;
+    height: 80rpx;
+    color: white;
+    border-radius: 5rpx;
+    line-height: 80rpx;
+    background-color: #07c160;
     float: right;
     margin-left: 40rpx;
 }

@@ -1,5 +1,5 @@
 {
-  "desc": "关于本文件的更多信息，请参考文档 https://developers.weixin.qq.com/miniprogram/dev/framework/sitemap.html",
+  "desc": "互联网无水印视频&图片提取与下载",
   "rules": [{
     "action": "allow",
     "page": "*"

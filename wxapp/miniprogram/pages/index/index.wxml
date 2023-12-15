@@ -5,7 +5,7 @@
         <textarea class="info" data-show='yes' value=" {{info}}"></textarea>
         <view class="button_area">
             <view class="button_copy_link" bind:tap="copyLink">复制链接</view> 
-            <view class="button right" bind:tap="download">保存到相册</view>
+            <view class="button_right" bind:tap="download">保存到相册</view>
         </view>
         <view class="progress-box">
             <progress percent="{{savePercent}}" show-info stroke-width="3"/>
@@ -31,13 +31,13 @@
         </view>
         <view class="tip">找到共计 {{image.urls.length}} 张图片</view>
     </block>
-    <block wx:elif="{{id}}">
+    <!-- <block wx:elif="{{id}}">
         <view>{{message?message:'资源加载中，请稍后'}}</view>
-    </block>
+    </block> -->
     <block wx:else="">
-        <textarea class="resId_input" placeholder="请输入资源ID" value="{{id}}"></textarea>
+        <textarea class="resId_input"  bindblur="resId_input_Blur" placeholder="请输入资源ID或者分享链接内容" value="{{id}}"></textarea>
         <view class="button_area">
-            <view class="button" bind:tap="submitResId">获取资源</view>
+            <view class="button" bind:tap="submitResId">提取资源</view>
         </view>
     </block>
 </view> 

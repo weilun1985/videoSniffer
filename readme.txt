@@ -10,6 +10,7 @@ docker run --name redis --restart=always -p 6378:6379 -v $PWD/redis_data:/data  
 index-url = https://pypi.tuna.tsinghua.edu.cn/simple
 [install]
 trusted-host = https://pypi.tuna.tsinghua.edu.cn
+单次：pip install numpy -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 1）scanic 相关：
 # pip3 install sanic
@@ -19,6 +20,10 @@ trusted-host = https://pypi.tuna.tsinghua.edu.cn
 # pip install jmespath
 # pip install redis
 # pip install colorlog
+# pip install PyOfficeRobot
+# pip install aioredis -i https://pypi.tuna.tsinghua.edu.cn/simple
+# pip install aiofiles -i https://pypi.tuna.tsinghua.edu.cn/simple
+# pip install aiohttp -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 2）playWright相关：
 # pip install playwright
