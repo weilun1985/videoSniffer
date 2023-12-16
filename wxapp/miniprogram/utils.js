@@ -338,8 +338,25 @@ function checkAuth(gotc) {
         }
     })
 }
-
+//字节文本表示
+function filesize_exp(size){
+    if(!size||size==0){
+        return '0';
+    }
+    var file_size_mode = ['B', 'KB', 'MB', 'GB'];
+    var file_size_str=`${size}${file_size_mode[0]}`;
+    for(var i=1;i<=file_size_mode.length;i++){
+        var size1=size/Math.pow(1024,i);
+        if(size1<1){
+            break;
+        }
+        size1=size1.toFixed(1);
+        file_size_str=`${size1}${file_size_mode[i]}`;
+    }
+    return file_size_str;
+}
 module.exports = {
     downloadFile,
-    downloadFiles
+    downloadFiles,
+    filesize_exp
 };

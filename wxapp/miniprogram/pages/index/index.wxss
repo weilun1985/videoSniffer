@@ -24,6 +24,14 @@ page {
     height: 250rpx;
     width: 95%;
 }
+.size_box{
+    padding: 10rpx;
+    border: solid 1rpx #888888;
+    font-size: 25rpx;
+    margin: 15rpx;
+    float: right;
+    min-width: 50rpx;
+}
 .progress-box{
     width: 95%;
 }

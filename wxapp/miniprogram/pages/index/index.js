@@ -1,11 +1,12 @@
 // index.js
 const app = getApp()
 const { envList } = require('../../envList.js');
-const { downloadFile, downloadFiles } = require('../../utils')
+const { downloadFile, downloadFiles,filesize_exp } = require('../../utils')
 
 Page({
     data: {
-        id:null
+        id:null,
+        size:'?MB',
     },
     onLoad:function(options){
         console.log('on load: options='+JSON.stringify(options));
@@ -14,6 +15,10 @@ Page({
             this.setData({id:id});
             this.loadResInfo(id);
         }
+    },
+    onPlay:function(e){
+        console.log(e);
+        const myVideoContext = wx.createVideoContext('myVideo');
     },
     resId_input_Blur(e){
         this.setData({
@@ -118,7 +123,8 @@ Page({
             downloadFile('video', this.data.video.durl,undefined,undefined,(pros)=>{
                 // console.debug('progress:',pros);
                 var percent=pros.progress;
-                that.setData({savePercent:percent});
+                var sizeExp=filesize_exp(pros.totalBytesExpectedToWrite);
+                that.setData({savePercent:percent,size:sizeExp});
             });
         }else if(this.data.image&&this.data.image.durls.length>0){
             downloadFiles('picture',this.data.image.durls,undefined,(prosl)=>{
@@ -132,8 +138,8 @@ Page({
                     currentb+=item.totalBytesWritten;
                 }
                 var percent=totalb==0?0:Math.round(currentb*100/totalb);
-                // console.debug(currentb,totalb,percent);
-                that.setData({savePercent:percent});
+                var sizeExp=filesize_exp(totalb);
+                that.setData({savePercent:percent,size:sizeExp});
             });
         }
     },

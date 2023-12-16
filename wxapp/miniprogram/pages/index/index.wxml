@@ -1,7 +1,10 @@
 <!--index.wxml-->
 <view class="container">
     <block wx:if="{{video}}">
-        <video class="video" src="{{video.url}}"></video>
+        <video id="myVideo" class="video" src="{{video.url}}" bindplay="onPlay"></video>
+        <view style="width: 100%;">
+            <view class="size_box">{{size}}</view>
+        </view>
         <textarea class="info" data-show='yes' value=" {{info}}"></textarea>
         <view class="button_area">
             <view class="button_copy_link" bind:tap="copyLink">复制链接</view> 
@@ -10,7 +13,7 @@
         <view class="progress-box">
             <progress percent="{{savePercent}}" show-info stroke-width="3"/>
         </view>
-        <view class="tip">如果无法保存，请点击“复制链接”，粘贴到手机浏览器进行下载。</view>
+        <view class="tip">如果无法保存，请点击“复制链接”，粘贴到手机浏览器进行下载。小程序只能下载不超过50MB的内容，如果超过了请“复制链接”到浏览器下载。</view>
     </block>
     <block wx:elif="{{image}}">     
         <view class="swiper-container">
@@ -21,6 +24,9 @@
                 </swiper-item>
             </block>
             </swiper>
+        </view>
+        <view style="width: 100%;">
+            <view class="size_box">{{size}}</view>
         </view>
         <textarea class="info" data-show='yes' value=" {{info}}"></textarea>
         <view class="button_area">
