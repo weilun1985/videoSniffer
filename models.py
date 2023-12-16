@@ -119,8 +119,10 @@ class ResInfoForApi:
         host="https://1e63211h01.yicp.fun/resproxy/"
         index_info=ResInfoForApi()
         index_info.id=res.id
-        index_info.title=res.name
-        index_info.descp=res.content
+        if hasattr(res,'name'):
+            index_info.title=res.name
+        if hasattr(res,'content'):
+            index_info.descp=res.content
         # index_info.res_downloaded=res.res_downloaded
         index_info.res_type=res.res_type
         if isinstance(res,VideoInfo):

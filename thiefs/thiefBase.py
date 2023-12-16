@@ -153,9 +153,9 @@ class ThiefBase(metaclass=abc.ABCMeta):
             return info
         info, data = self.fetch()
         if info is not None:
-            if info.name is not None:
+            if hasattr(info,'name') and info.name is not None:
                 info.name = info.name.strip()
-            if info.content is not None:
+            if hasattr(info,'content') and info.content is not None:
                 info.content = info.content.strip()
         info.id = self.target_id()
         info.thief = self.name
