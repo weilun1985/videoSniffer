@@ -113,10 +113,28 @@ Page({
         })
     },
     download() {
+        var that=this;
         if(this.data.video){
-            downloadFile('video', this.data.video.durl);
+            downloadFile('video', this.data.video.durl,undefined,undefined,(pros)=>{
+                // console.debug('progress:',pros);
+                var percent=pros.progress;
+                that.setData({savePercent:percent});
+            });
         }else if(this.data.image&&this.data.image.durls.length>0){
-            downloadFiles('picture',this.data.image.durls);
+            downloadFiles('picture',this.data.image.durls,undefined,(prosl)=>{
+                var totalb=0;
+                var currentb=0;
+                for(var item of prosl){
+                    if (!item){
+                        continue;
+                    }
+                    totalb+=item.totalBytesExpectedToWrite;
+                    currentb+=item.totalBytesWritten;
+                }
+                var percent=totalb==0?0:Math.round(currentb*100/totalb);
+                // console.debug(currentb,totalb,percent);
+                that.setData({savePercent:percent});
+            });
         }
     },
     copyLink() {
