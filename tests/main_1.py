@@ -2,13 +2,11 @@
 # pip install playwright -U
 # playwright install
 
-import time,re,os
-import mailbox
-import asyncio
+import time, os
+from channels import mailbox
 import logging
 import multiprocessing
-import thief_router
-from thiefs.thiefBase import ThiefBase
+from tests import thief_router
 from multiprocessing import Queue
 from datetime import datetime
 
@@ -20,7 +18,7 @@ def mail_daemon_run(mail_queue:Queue):
     log.info('mail_daemon_run: %s', datetime.now().strftime('%Y-%m-%d-%H:%M:%S'))
     while True:
         try:
-            mails=mailbox.select_mails()
+            mails= mailbox.select_mails()
             for mail_info in mails:
                 mail_queue.put(mail_info)
             time.sleep(5)
@@ -36,7 +34,7 @@ def worker_daemon_run(mail_queue:Queue):
         if shared_text is None:
             continue
         try:
-            thief=thief_router.do_route(shared_text)
+            thief= thief_router.do_route(shared_text)
             if thief is None:
                 continue
             # 启动多进程
@@ -77,7 +75,7 @@ def thief_go(thief,mail_info):
             mailbox.reply_mail(mail_info, subject, content, None, None)
         else:
             content += f'\r\n相关资源在附件中，请查收'
-            mailbox.reply_mail(mail_info,subject,content,None,files)
+            mailbox.reply_mail(mail_info, subject, content, None, files)
 
 
 def run():

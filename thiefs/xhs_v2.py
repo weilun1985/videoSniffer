@@ -42,18 +42,24 @@ class Xhs(ThiefBase):
         if tp=='video':
             video_key=tools.json_select('video.consumer.originVideoKey',rs_0)
             video_key = video_key.replace("\\u002F", "/")
-            video_url = "http://sns-video-bd.xhscdn.com/" + video_key
+            video_url = "https://sns-video-bd.xhscdn.com/" + video_key
 
             res_info = VideoInfo()
             res_info.res_type='video'
             res_info.res_url = video_url
-            # print(video_url)
+
+            # finfo=tools.remote_file_info(video_url)
+            # if finfo:
+            #     size=finfo.get('Content-Length')
+            #     res_info.res_size=size
             pass
         elif tp=='normal':
             rs_1=tools.json_select('imageList[].infoList[1].url', rs_0)
             res_info = PictureInfo()
             res_info.res_type = 'picture'
             for pic in rs_1:
+                if pic.startswith("http:"):
+                    pic=f'https:{pic[5:]}'
                 res_info.res_url_list.append(pic)
         title=tools.json_select('title',rs_0)
         content=tools.json_select('desc',rs_0)
@@ -61,6 +67,7 @@ class Xhs(ThiefBase):
         res_info.name = title
         res_info.content = content
         return res_info, None
+
 
 
 if __name__ == '__main__':

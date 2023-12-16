@@ -1,10 +1,15 @@
 # pip install jmespath
 
 import hashlib
+import os
 import json
 import math
+
+import aiohttp
 import jmespath
 import redis
+import requests
+
 import mylog
 import socket
 from datetime import datetime
@@ -25,13 +30,12 @@ QUEUE_THIEF_TASK='VideoSniffer:Thief_Task_Queue'
 QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:{}'
 SET_RES_INFO='VideoSniffer:Res_Info:{}'
 
+
 HOST_REDIS='192.168.31.162'
 PORT_REDIS=6378
 HOST_IP=get_host_ip()
 
 redis_pool=redis.ConnectionPool(host=('localhost')if(get_host_ip()==HOST_REDIS)else HOST_REDIS,port=PORT_REDIS,decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
-
-
 
 def get_redis():
     redis_conn = redis.Redis(connection_pool=redis_pool)
@@ -39,6 +43,9 @@ def get_redis():
 
 def get_logger():
     return mylog.get_logger()
+
+def get_current_workdir():
+    return os.getcwd()
 
 class MyJsonEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Any:
@@ -109,6 +116,28 @@ def is_empty_str(instr:str):
 
 def not_empty_str(instr:str):
     return not is_empty_str(instr)
+
+async def async_remote_file_info(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.head(url) as resp:
+            if resp.status in [200,206,304]:
+                return {'content_type':resp.content_type,
+                        'content_length':resp.content_length,
+                        'content_disposition':resp.content_disposition,
+                        'charset':resp.charset
+                }
+def remote_file_info(url):
+    try:
+        with requests.head(url) as resp:
+            if resp.status_code in [200, 206, 304]:
+                return {'Content-Type': resp.headers.get("Content-Type"),
+                        'Content-Length': resp.headers.get("Content-Length"),
+                        'Content-Disposition': resp.headers.get("Content-Disposition"),
+                        'Charset': resp.headers.get("Charset")
+                        }
+    except Exception as e:
+        get_logger().error(e,exc_info=True)
+
 
 
 if __name__ == '__main__':

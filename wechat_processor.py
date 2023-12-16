@@ -1,9 +1,9 @@
 import time
 import message_center
-import wechat3
+from channels import wechat3
 import tools
 from datetime import datetime
-from models import WeChatMessageInfo,WeChatSessionInfo,WeChatSendInfo,ChannelType
+from models import ChannelType
 
 log=tools.get_logger()
 
@@ -22,7 +22,7 @@ def run():
             me = wechat3.me_is_who()
             # 检测新消息
             # log.info('start check new msg...')
-            a,b=wechat3.check_new_msg(msg_handler)
+            a,b= wechat3.check_new_msg(msg_handler)
             if a>0:
                 log.info(f'check new msg compleate, receive={a}, got={b}')
         except Exception as e:
@@ -39,11 +39,11 @@ def run():
                     break
                 c=c+1
                 if send_info.Content is not None:
-                    wechat3.send_msg(send_info.To,send_info.Content)
+                    wechat3.send_msg(send_info.To, send_info.Content)
                 if send_info.Files is not None:
                     for file in send_info.Files:
                         log.info(f'send-file-to "{send_info.To}": {file}')
-                        wechat3.send_file(send_info.To,file)
+                        wechat3.send_file(send_info.To, file)
                 d=d+1
             except Exception as e:
                 log.error(e, exc_info=True)

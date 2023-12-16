@@ -30,7 +30,7 @@ trusted-host = https://pypi.tuna.tsinghua.edu.cn
 # playwright install
 
 3、运行webApp:
-nohup python application.py &
+nohup python webapp_start.py &
 tail -f nohup.out
 查进程： ps -ef | grep python
 杀进程：

@@ -1,4 +1,5 @@
 import os
+import threading
 import time
 import typing
 
@@ -33,32 +34,37 @@ def thief_route(shared_text)->ThiefBase|None:
     return thief
 
 def thief_go(thief,from_msg):
-    info:ResInfo= thief.go()
-    if info is None:
-        send_reply(from_msg,'不好意思啊，小的无能，没能找到您要的资源。我已经记录下来了，尽快学会寻找这类资源。')
-        log.warning(f'未能获取倒指定资源：{thief.name} {thief.target_url}')
-        return
-    # 保存索引信息到Redis
-    cache_res_info(info)
-    # 编辑并发送回复信息
-    content=''
-    if isinstance(info,VideoInfo):
-        content+=f'为您找到1个视频： \r\n1. {info.res_url}'
-    elif isinstance(info,PictureInfo):
-        content+=f'为您找到{len(info.res_url_list)}张图片：'
-        for i in range(len(info.res_url_list)):
-            content+=f'\r\n{i+1}. {info.res_url_list[i]}'
-    if tools.not_empty_str(info.name) or tools.not_empty_str(info.content):
-        content+=f'\r\n\r\n同时帮您取到了更多的信息如下：'
-        a=1
-        if tools.not_empty_str(info.name):
-            content += f'\r\n{a}. 标题：\r\n{info.name}'
-            a+=1
-        if tools.not_empty_str(info.content):
-            content += f'\r\n{a}. 描述：\r\n{info.content}'
-            a+=1
-    content+='\r\n\r\n由于目前系统还未完善，所以需要请您拷贝上面的资源链接粘贴到浏览器中打开后手工下载。程序哥哥正在加紧开发中，为您带来的不便请见谅。。。'
-    send_reply(from_msg,content,None)
+    try:
+        info:ResInfo= thief.go()
+        if info is None:
+            send_reply(from_msg,'不好意思啊，小的无能，没能找到您要的资源。我已经记录下来了，尽快学会寻找这类资源。')
+            log.warning(f'未能获取倒指定资源：{thief.name} {thief.target_url}')
+            return
+        # 保存索引信息到Redis
+        cache_res_info(info)
+        # 编辑并发送回复信息
+        content=''
+        if isinstance(info,VideoInfo):
+            content+=f'为您找到1个视频： \r\n1. {info.res_url}'
+        elif isinstance(info,PictureInfo):
+            content+=f'为您找到{len(info.res_url_list)}张图片：'
+            for i in range(len(info.res_url_list)):
+                content+=f'\r\n{i+1}. {info.res_url_list[i]}'
+        if tools.not_empty_str(info.name) or tools.not_empty_str(info.content):
+            content+=f'\r\n\r\n同时帮您取到了更多的信息如下：'
+            a=1
+            if tools.not_empty_str(info.name):
+                content += f'\r\n{a}. 标题：\r\n{info.name}'
+                a+=1
+            if tools.not_empty_str(info.content):
+                content += f'\r\n{a}. 描述：\r\n{info.content}'
+                a+=1
+        content+='\r\n\r\n由于目前系统还未完善，所以需要请您拷贝上面的资源链接粘贴到浏览器中打开后手工下载。程序哥哥正在加紧开发中，为您带来的不便请见谅。。。'
+        send_reply(from_msg,content,None)
+    except Exception as e:
+        log.error(e, exc_info=True)
+        reply = f'哎呀呀，不好意思我出问题了，需要休息一下，请您稍后再试。'
+        send_reply(from_msg, reply)
 
 def cache_res_info(info):
     message_center.setResInfoToRedis(info)
@@ -87,12 +93,10 @@ def do_task(task):
         thief = thief_route(shared_text)
     if thief is not None:
         send_reply(body,'任务已收到，正在处理中，稍后返回您结果。')
-        try:
-            thief_go(thief,body)
-        except Exception as e:
-            log.error(e,exc_info=True)
-            reply=f'哎呀呀，不好意思我出问题了，需要休息一下，请您稍后再试。'
-            send_reply(body,reply)
+        # 新起一个线程来跑
+        # thief_go(thief,body)
+        thr=threading.Thread(target=thief_go,args=(thief,body))
+        thr.start()
     else:
         default_reply = f'您的任务我已收到了，可是这个任务我暂时还不会哈，等我学会后再帮您解决。\r\n"{shared_text}"'
         send_reply(body,default_reply)

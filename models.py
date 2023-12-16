@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List,Any
-
+from utils.wx_dw_hosts import is_host_in_wxdw
 import tools
 
 
@@ -97,11 +97,13 @@ class VideoInfo(ResInfo):
     def  __init__(self):
         self.res_url:str=None
         self.res_file:str=None
+        self.res_size:int=0
 
 class PictureInfo(ResInfo):
     def __init__(self):
         self.res_url_list = []
         self.res_file_list=[]
+
 
 class ResInfoForApi:
     def __init__(self):
@@ -122,9 +124,13 @@ class ResInfoForApi:
         # index_info.res_downloaded=res.res_downloaded
         index_info.res_type=res.res_type
         if isinstance(res,VideoInfo):
+            durl=res.res_url
+            if not is_host_in_wxdw(durl):
+                durl=f'{host}{res.id}_0.mp4'
             index_info.video={
                 'url':res.res_url,
-                'durl':f'{host}{res.id}_0.mp4'
+                'durl':durl,
+                'size':res.res_size
             }
         elif isinstance(res,PictureInfo):
             urls=[]
@@ -132,7 +138,10 @@ class ResInfoForApi:
             a=0
             for url in res.res_url_list:
                 urls.append(url)
-                durls.append(f'{host}{res.id}_{a}.jpg')
+                durl=url
+                if not is_host_in_wxdw(durl):
+                    durl = f'{host}{res.id}_{a}.jpg'
+                durls.append(durl)
                 a+=1
             index_info.image={
                 'urls':urls,

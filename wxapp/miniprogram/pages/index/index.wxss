@@ -85,6 +85,12 @@ progress {margin: 10px;}
     margin-left: 40rpx;
 }
 
+.logo{
+    width: 450rpx;
+    height: 450rpx;
+    margin-top: 50rpx;
+}
+
 .resId_input{
     border:solid 1px #888888;
     width: 98%;
