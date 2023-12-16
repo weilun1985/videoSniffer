@@ -130,7 +130,7 @@ class ResInfoForApi:
             index_info.video={
                 'url':res.res_url,
                 'durl':durl,
-                'size':res.res_size
+                'size':res.res_size if hasattr(res,'res_size') else 0
             }
         elif isinstance(res,PictureInfo):
             urls=[]

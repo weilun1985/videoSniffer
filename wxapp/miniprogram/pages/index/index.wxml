@@ -40,6 +40,5 @@
             <view class="button" bind:tap="submitResId">提取资源</view>
         </view>
         <image class="logo" src="https://1e63211h01.yicp.fun/static/logo.jpg"></image>
-        123456
     </block>
 </view> 
