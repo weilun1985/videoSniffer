@@ -40,8 +40,6 @@ def thief_go(thief,from_msg):
             send_reply(from_msg,'不好意思啊，小的无能，没能找到您要的资源。我已经记录下来了，尽快学会寻找这类资源。')
             log.warning(f'未能获取倒指定资源：{thief.name} {thief.target_url}')
             return
-        # 保存索引信息到Redis
-        cache_res_info(info)
         # 编辑并发送回复信息
         content=''
         if isinstance(info,VideoInfo):
@@ -66,8 +64,8 @@ def thief_go(thief,from_msg):
         reply = f'哎呀呀，不好意思我出问题了，需要休息一下，请您稍后再试。'
         send_reply(from_msg, reply)
 
-def cache_res_info(info):
-    message_center.setResInfoToRedis(info)
+# def cache_res_info(info):
+#     message_center.setResInfoToRedis(info)
 
 def send_reply(from_message,reply,fiels=None):
     if isinstance(from_message,WeChatMessageInfo):

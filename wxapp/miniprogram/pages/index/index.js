@@ -98,7 +98,7 @@ Page({
                     }
                 }
                 this.setData(data);
-                // console.dir(data);
+                console.log(data);
               }else{
                   var msg=res.statusCode+' ';
                   if(res.data.errmsg){
@@ -116,7 +116,7 @@ Page({
         if(this.data.video){
             downloadFile('video', this.data.video.durl);
         }else if(this.data.image&&this.data.image.durls.length>0){
-            downloadFiles('image',this.data.image.durls);
+            downloadFiles('picture',this.data.image.durls);
         }
     },
     copyLink() {
