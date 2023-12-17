@@ -159,11 +159,13 @@ class WeChatUtil:
                     btn_max_area=area
                     btn_main=btn
 
-        msg_content = [name]
+        msg_content =[]
         for n in range(1,5):
             txc = rect_main.TextControl(foundIndex=n)
-            if txc.Exists(maxSearchSeconds=0):
+            if txc.Exists(maxSearchSeconds=0) and not tools.is_empty_str(txc.Name):
                 msg_content.append(txc.Name)
+        if len(msg_content)==0:
+            msg_content.append(name)
 
         msg_info=WeChatMessageInfo()
         msg_info.Sender=sender_btn.Name
@@ -244,7 +246,9 @@ def search_session(key):
 def send_msg(session_name,msg):
     wechat=__get_wx_win()
     wechat.SetActive()
-    __search_session(wechat, session_name)
+    current_sess_name = current_chat(wechat)
+    if current_sess_name!=session_name:
+        __search_session(wechat, session_name)
     edit = wechat.EditControl(Name=session_name)
     if edit.Exists():
         auto.SetClipboardText(msg)
@@ -265,7 +269,9 @@ def send_file(session_name,file):
         raise FileTooLargeException
     wechat = __get_wx_win()
     wechat.SetActive()
-    __search_session(wechat, session_name)
+    current_sess_name = current_chat(wechat)
+    if current_sess_name != session_name:
+        __search_session(wechat, session_name)
     edit = wechat.EditControl(Name=session_name)
     if edit.Exists():
         wintools.setClipboardFiles([file])
@@ -287,7 +293,65 @@ def me_is_who():
     wechat.SetActive()
     return __me_is_who(wechat)
 
-def get_session_list():
+def list_newMsg_session(newMsgHandler=None):
+    wechat = __get_wx_win()
+    wechat.SetActive()
+    me = __me_is_who(wechat)
+    sesListCtl = wechat.ListControl(Name='会话')
+    auto.WaitForExist(sesListCtl, 0.1)
+    # 只获取新消息，由于无置顶的情况下新消息都会在顶部，因此可以认为如果碰到没有新消息的会话，则可以跳出循环
+    show_percent, hidd_percent, s_i = 1, 0, 0
+    scrollCtl = sesListCtl.GetScrollPattern()
+    # 存在滚动条且可以垂直滚动
+    if scrollCtl is not None and scrollCtl.VerticallyScrollable:
+        scrollCtl.SetScrollPercent(horizontalPercent=0, verticalPercent=0)
+        # 先一滚到底，看看隐藏区域占比多少
+        scrollCtl.SetScrollPercent(horizontalPercent=0, verticalPercent=1)
+        hidd_percent = scrollCtl.VerticalScrollPercent  # 隐藏区域占比
+        show_percent = 1 - hidd_percent  # 可见区域占比
+        # 计算垂直滚动条要向下滚动的次数
+        s_i = math.ceil(hidd_percent / show_percent)
+        # 滚回顶部
+        scrollCtl.SetScrollPercent(horizontalPercent=0, verticalPercent=0)
+    # 开始获取会话列表
+    session_list = []
+    cursess_item = sesListCtl.GetFirstChildControl()
+    a, b = 0, 0
+    while True:
+        sess = WeChatUtil.parse_session_info(cursess_item)
+        sess.Me = me
+        # 如果没有新消息，则表示没有新消息。注意：不适合设置了置顶联系人的情况
+        if sess.NewMsgNum == 0:
+            break
+        a+=sess.NewMsgNum
+        session_list.append(sess)
+        # 点击当前会话，获取会话的新消息
+        cursess_item.ButtonControl(Name=sess.SessionName).Click(simulateMove=False)
+        log.info(f'session={sess.SessionName} new_msg_cnt={sess.NewMsgNum} last_msg_time={sess.LastMsgTime}')
+        new_msg_list = get_message_list(session_info=sess, max_count=sess.NewMsgNum)
+        b+=len(new_msg_list)
+        sess.MessageList = new_msg_list
+        # 触发回调
+        for msg in new_msg_list:
+            try:
+                if newMsgHandler:
+                    newMsgHandler(sess, msg)
+            except Exception as e:
+                log.error(e, exc_info=True)
+        height = cursess_item.BoundingRectangle.height()
+        # 下滑区域
+        sesListCtl.WheelDown(height)
+        # 切换到下一条消息
+        next_item=cursess_item.GetNextSiblingControl()
+        if next_item is not None and next_item.Exists():
+            cursess_item=next_item
+        else:
+            break
+    return session_list,a,b
+
+
+
+def get_session_list(only_new:bool=False):
     wechat = __get_wx_win()
     wechat.SetActive()
     me=__me_is_who(wechat)
@@ -309,12 +373,19 @@ def get_session_list():
     # 开始获取会话列表
     session_list = []
     session_names = []
+    abort=False
     for i in range(s_i + 1):
+        if abort:
+            break
         list0 = sesListCtl.GetChildren()
         if list0 is not None:
             for item in list0:
                 sess = WeChatUtil.parse_session_info(item)
                 if sess is not None and sess.SessionName not in session_names:
+                    # 如果只获取新消息，由于无置顶的情况下新消息都会在顶部，因此可以认为如果碰到没有新消息的会话，则可以跳出循环
+                    if only_new and sess.NewMsgNum==0:
+                        abort=True
+                        break
                     sess.Me=me
                     session_list.append(sess)
                     session_names.append(item.Name)
@@ -355,7 +426,7 @@ def get_message_list(session_info:WeChatSessionInfo=None, time_util=None, max_co
 
     #获取会话列表
     msgListCtl=wechat.ListControl(Name='消息')
-    msgListCtl.Click()
+    # msgListCtl.Click()
     scrollCtl = msgListCtl.GetScrollPattern()
     # 存在滚动条且可以垂直滚动
     if scrollCtl is not None and scrollCtl.VerticallyScrollable:
@@ -462,21 +533,6 @@ def check_new_msg(handler):
 
 
 
-def test_2():
-    msglist = get_message_list(session_info=None)
-    a = 1
-    for msg in msglist:
-        if msg.MsgFullGet==False:
-            print(msg.__dict__)
-        a += 1
-    pass
-
-def test_3():
-    list = get_session_list()
-    a = 1
-    for session in list:
-        print(a, session.__dict__)
-        a += 1
 
 def test_4():
     send_msg('我我我',f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
@@ -490,13 +546,13 @@ def test_5():
 
     while True:
         print('start check new msg...')
-        check_new_msg(fun)
+        list_newMsg_session(fun)
         print(f'start reply msg, mq_size={mq.qsize()}')
-        for i in range(mq.qsize()):
-            msg = mq.get_nowait()
-            jstr=json.dumps(msg.MsgContent)
-            re_msg = f'reply for "{msg.MsgContentType} - {len(jstr)}" by "{msg.Sender}" at {msg.MsgTime.strftime("%Y-%m-%d %H:%m")}'
-            send_msg(msg.SessionName, re_msg)
+        # for i in range(mq.qsize()):
+        #     msg = mq.get_nowait()
+        #     jstr=json.dumps(msg.MsgContent)
+        #     re_msg = f'reply for "{msg.MsgContentType} - {len(jstr)}" by "{msg.Sender}" at {msg.MsgTime.strftime("%Y-%m-%d %H:%m")}'
+        #     send_msg(msg.SessionName, re_msg)
         time.sleep(5)
     pass
 
@@ -504,10 +560,9 @@ def test_6():
     file=r"E:\myworking\myprojects\xiaohongshu_downloader\download\Xhs\videos\01e5594329b536aa010370038be4b08976_258.mp4"
     send_file('Li',file)
 
-def test_7():
-    print(me_is_who())
+
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    test_7()
+    test_5()
     pass

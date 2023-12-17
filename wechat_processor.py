@@ -22,7 +22,8 @@ def run():
             me = wechat3.me_is_who()
             # 检测新消息
             # log.info('start check new msg...')
-            a,b= wechat3.check_new_msg(msg_handler)
+            # a,b= wechat3.check_new_msg(msg_handler)
+            slist,a,b=wechat3.list_newMsg_session(msg_handler)
             if a>0:
                 log.info(f'check new msg compleate, receive={a}, got={b}')
         except Exception as e:
