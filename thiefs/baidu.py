@@ -38,7 +38,22 @@ class Baidu(ThiefBase):
         res_info.res_url = video_url
         res_info.share_url = url
         res_info.name = title
+
+        test_dw(res_info.res_url)
         return res_info, None
+
+
+
+
+def test_dw(url):
+    url0='https://vd4.bdstatic.com/mda-pm833x8j2n4bzt09/720p_frame30/h264_cae_acd/1702098158625665451/mda-pm833x8j2n4bzt09.mp4?v_from_s=bdapp-resbox-zan-hnb'
+    print(url0)
+    print(url)
+    res = requests.get(url, allow_redirects=False)
+    real_url = res.headers.get("location")
+    print(res.status_code)
+    print(len(res.content))
+
 
 
 if __name__ == '__main__':

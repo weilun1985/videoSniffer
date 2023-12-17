@@ -24,6 +24,7 @@ page {
     height: 250rpx;
     width: 95%;
 }
+
 .size_box{
     padding: 10rpx;
     border: solid 1rpx #888888;
@@ -46,7 +47,7 @@ progress {margin: 10px;}
     width: 90%;
     text-align: center;
     margin: 30rpx auto 0 auto;
-  }
+}
 
 .top_tip {
   font-size: 28rpx;
@@ -54,6 +55,13 @@ progress {margin: 10px;}
   font-weight: 400;
   color: #888888;
   margin-bottom: 28rpx;
+}
+
+.msg{
+    font-size: 28rpx;
+    font-family: PingFang SC;
+    color:red;
+    margin: 30rpx auto 0 auto;
 }
 
 .button_area{

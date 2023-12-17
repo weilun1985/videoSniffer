@@ -107,7 +107,7 @@ def json_select(query,data):
     return result
 
 def is_empty_str(instr:str):
-    if str is None:
+    if instr is None:
         return True
     instr=instr.strip()
     if len(instr)==0:
