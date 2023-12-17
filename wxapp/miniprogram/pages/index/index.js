@@ -6,7 +6,6 @@ const { downloadFile, downloadFiles,filesize_exp } = require('../../utils')
 Page({
     data: {
         id:null,
-        size:'?MB',
     },
     onLoad:function(options){
         console.log('on load: options='+JSON.stringify(options));
@@ -20,14 +19,19 @@ Page({
         console.log(e);
         const myVideoContext = wx.createVideoContext('myVideo');
     },
-    resId_input_Blur(e){
+    resId_input(e){
         this.setData({
             id:e.detail.value
         })
         console.log('set-id:'+e.detail.value);
     },
     submitResId(){
-        console.dir(this.data);
+        // var query=wx.createSelectorQuery();
+        // query.select('#resId_input').fields({value:true});
+        // query.exec((res)=>{
+        //     const value=res[0].value;
+        //     console.debug('value=',value);
+        // })
         var id=this.data.id;
         if(id&&id.length>0){
             console.log('To get res: '+id);
