@@ -1,14 +1,18 @@
 const { hex_md5, str_md5 } = require('./md5')
 
 function clear_temps(){
-    const mydir=`${wx.env.USER_DATA_PATH}/wl`;
+    const mydir=`${wx.env.USER_DATA_PATH}`;
     const fs = wx.getFileSystemManager();
     try{
         let files=fs.readdirSync(mydir);
         files.forEach(item=>{
             var path=`${mydir}/${item}`;
-            fs.unlinkSync(path);
-            console.log(`unlink file: ${path}`);
+            try{
+                fs.unlinkSync(path);
+                console.log(`unlink file ok: ${path}`);
+            }catch(err){
+                console.log(`unlink file fail: ${path} ${err}`);
+            }
         });
     }
     catch(err){
@@ -173,7 +177,7 @@ function downloadSaveFile(type, url, successc, failc,progressc) {
     //const targetName=timeSeqStr()+(ext?`.${ext}`:'');
     const targetName=hex_md5(url)+(ext?`.${ext}`:'');
     console.debug('targetName:',targetName);
-    const mydir=`${wx.env.USER_DATA_PATH}/wl`;
+    const mydir=`${wx.env.USER_DATA_PATH}`;
     const targetPath=`${mydir}/${targetName}`;
     var dtask=wx.downloadFile({
         url: url,
