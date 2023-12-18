@@ -123,13 +123,16 @@ Page({
     },
     download() {
         var that=this;
+        const startc=function(){
+            
+        }
         if(this.data.video){
             downloadFile('video', this.data.video.durl,undefined,undefined,(pros)=>{
                 // console.debug('progress:',pros);
                 var percent=pros.progress;
                 var sizeExp=filesize_exp(pros.totalBytesExpectedToWrite);
                 that.setData({savePercent:percent,size:sizeExp});
-            });
+            },startc);
         }else if(this.data.image&&this.data.image.durls.length>0){
             downloadFiles('picture',this.data.image.durls,undefined,(prosl)=>{
                 var totalb=0;
@@ -144,7 +147,7 @@ Page({
                 var percent=totalb==0?0:Math.round(currentb*100/totalb);
                 var sizeExp=filesize_exp(totalb);
                 that.setData({savePercent:percent,size:sizeExp});
-            });
+            },startc);
         }
     },
     copyLink() {

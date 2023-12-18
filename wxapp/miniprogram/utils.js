@@ -1,13 +1,35 @@
 const { hex_md5, str_md5 } = require('./md5')
+
+function clear_temps(){
+    const mydir=`${wx.env.USER_DATA_PATH}/wl`;
+    const fs = wx.getFileSystemManager();
+    try{
+        let files=fs.readdirSync(mydir);
+        files.forEach(item=>{
+            var path=`${mydir}/${item}`;
+            fs.unlinkSync(path);
+            console.log(`unlink file: ${path}`);
+        });
+    }
+    catch(err){
+        fs.mkdirSync(mydir,true);
+        console.warn(err);
+        
+    }finally{
+        
+    }
+}
 /**
 * 下载单个文件
 */
-function downloadFile(type, url, successc, failc,progressc) {
+function downloadFile(type, url, successc, failc,progressc,startc) {
     checkAuth(() => {
-        wx.showLoading({
-            title: '文件下载中...',
-            mask: true
-        })
+        // wx.showLoading({
+        //     title: '文件下载中...',
+        //     mask: true
+        // })
+        clear_temps();
+        startc&&startc();
         downloadSaveFile(
             type,
             url,
@@ -37,7 +59,7 @@ function downloadFile(type, url, successc, failc,progressc) {
 /**
 * 下载多个文件
 */
-function downloadFiles(type, urls, completec,progressc) {
+function downloadFiles(type, urls, completec,progressc,startc) {
     let success = 0;
     let fail = 0;
     let total = urls.length;
@@ -45,10 +67,12 @@ function downloadFiles(type, urls, completec,progressc) {
     let progressL=new Array(urls.length);
 
     checkAuth(() => {
-        wx.showLoading({
-            title: '文件下载中...',
-            mask: true
-        })
+        // wx.showLoading({
+        //     title: '文件下载中...',
+        //     mask: true
+        // })
+        clear_temps();
+        startc&&startc();
         for (let i = 0; i < urls.length; i++) {
             downloadSaveFile(
                 type,
@@ -149,7 +173,8 @@ function downloadSaveFile(type, url, successc, failc,progressc) {
     //const targetName=timeSeqStr()+(ext?`.${ext}`:'');
     const targetName=hex_md5(url)+(ext?`.${ext}`:'');
     console.debug('targetName:',targetName);
-    const targetPath=`${wx.env.USER_DATA_PATH}/${targetName}`;
+    const mydir=`${wx.env.USER_DATA_PATH}/wl`;
+    const targetPath=`${mydir}/${targetName}`;
     var dtask=wx.downloadFile({
         url: url,
         filePath:targetPath,
