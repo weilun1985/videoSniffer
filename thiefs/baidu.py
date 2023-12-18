@@ -39,7 +39,7 @@ class Baidu(ThiefBase):
         res_info.share_url = url
         res_info.name = title
 
-        test_dw(res_info.res_url)
+        # test_dw(res_info.res_url)
         return res_info, None
 
 
@@ -57,7 +57,8 @@ def test_dw(url):
 
 
 if __name__ == '__main__':
-    shared_url='https://mbd.baidu.com/newspage/data/videolanding?nid=sv_4879939042257911735&sourceFrom=share'
+    # shared_url='https://mbd.baidu.com/newspage/data/videolanding?nid=sv_4879939042257911735&sourceFrom=share'
+    shared_url='https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
     baidu = Baidu(shared_url)
     info, data = baidu.fetch()
     print(info.__dict__)
