@@ -16,7 +16,7 @@ function clear_temps(){
         });
     }
     catch(err){
-        fs.mkdirSync(mydir,true);
+        // fs.mkdirSync(mydir,true);
         console.warn(err);
         
     }finally{
@@ -26,14 +26,15 @@ function clear_temps(){
 /**
 * 下载单个文件
 */
-function downloadFile(type, url, successc, failc,progressc,startc) {
+function downloadFile(type, url, completec,progressc,startc) {
     checkAuth(() => {
         // wx.showLoading({
         //     title: '文件下载中...',
         //     mask: true
         // })
+    
         clear_temps();
-        startc&&startc();
+        startc&&startc({type:type,url:url});
         downloadSaveFile(
             type,
             url,
@@ -43,7 +44,7 @@ function downloadFile(type, url, successc, failc,progressc,startc) {
                     title: '下载成功',
                     icon: 'none',
                 })
-                successc && successc(path);
+                completec && completec({success:true,path:path});
             },
             (errMsg) => {
                 wx.hideLoading();
@@ -51,7 +52,7 @@ function downloadFile(type, url, successc, failc,progressc,startc) {
                     title: errMsg,
                     icon: 'none',
                 })
-                failc && failc(errMsg);
+                completec && completec({success:false,errMsg:errMsg});
             },
             (prog)=>{
                 progressc&&progressc(prog);
@@ -64,9 +65,9 @@ function downloadFile(type, url, successc, failc,progressc,startc) {
 * 下载多个文件
 */
 function downloadFiles(type, urls, completec,progressc,startc) {
-    let success = 0;
-    let fail = 0;
-    let total = urls.length;
+    let success_cnt = 0;
+    let fail_cnt = 0;
+    let total_cnt = urls.length;
     let errMsgs = [];
     let progressL=new Array(urls.length);
 
@@ -82,16 +83,16 @@ function downloadFiles(type, urls, completec,progressc,startc) {
                 type,
                 urls[i],
                 () => {
-                    success++;
-                    if (success + fail === total) {
-                        saveCompleted(success, fail, completec, errMsgs);
+                    success_cnt++;
+                    if (success_cnt + fail_cnt === total_cnt) {
+                        saveCompleted(success_cnt, fail_cnt, completec, errMsgs);
                     }
                 },
                 (errMsg) => {
-                    fail++;
+                    fail_cnt++;
                     errMsg && errMsgs.push(`${i}${errMsg}`);
-                    if (success + fail === total) {
-                        saveCompleted(success, fail, completec, errMsgs);
+                    if (success_cnt + fail_cnt === total_cnt) {
+                        saveCompleted(success_cnt, fail_cnt, completec, errMsgs);
                     }
                 },
                 (prog)=>{
@@ -104,7 +105,7 @@ function downloadFiles(type, urls, completec,progressc,startc) {
 }
 
 //保存完成
-function saveCompleted(success, fail, completec, errMsgs) {
+function saveCompleted(success_cnt, fail_cnt, completec, errMsgs) {
     wx.hideLoading();
     let errMsg = '无';
     if (errMsgs.length) {
@@ -112,12 +113,12 @@ function saveCompleted(success, fail, completec, errMsgs) {
     }
 
     wx.showModal({
-        title: `成功${success}项，失败${fail}项`,
+        title: `成功${success_cnt}项，失败${fail_cnt}项`,
         content: `失败信息:\n${errMsg}`,
         showCancel: false,
         success(res) {
             if (res.confirm) {
-                completec && completec();
+                completec && completec({success_cnt:success_cnt,fail_cnt:fail_cnt,errMsg:errMsg});
             }
         }
     })
@@ -142,8 +143,8 @@ function getMediaType(url){
     if(!ext){
         return;
     }
-    videos=['mp4','avi','wmv','flv','mov','mkv','webm','3gp'];
-    pictures=['jpg','jpeg','png','gif','bmp','tiff','tif','webp','svg'];
+    const videos=['mp4','avi','wmv','flv','mov','mkv','webm','3gp'];
+    const pictures=['jpg','jpeg','png','gif','bmp','tiff','tif','webp','svg'];
     if(videos.indexOf(ext)!=-1){
         return'video';
     }else if(pictures.indexOf(ext)!=-1){
@@ -182,6 +183,7 @@ function downloadSaveFile(type, url, successc, failc,progressc) {
     var dtask=wx.downloadFile({
         url: url,
         filePath:targetPath,
+        timeout:600000,
         success:res=>{
             if (res.statusCode === 200) {
                 console.log('下载成功:',res);
@@ -210,8 +212,11 @@ function downloadSaveFile(type, url, successc, failc,progressc) {
                         }
                     });
                 }else{
-                    console.log('非图片视频类文件，保存路径:',res.savedFilePath);
-                    successc && successc(res.savedFilePath);
+                    console.log('非图片视频类文件，保存路径:',targetPath);
+                    successc && successc(targetPath);
+                    wx.openDocument({
+                        filePath: targetPath,
+                      });
                 }
             }else{
                 msg=`下载失败: statusCode=${res.statusCode}`

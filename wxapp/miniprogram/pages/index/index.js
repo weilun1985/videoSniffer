@@ -123,12 +123,14 @@ Page({
     },
     download() {
         var that=this;
-        const startc=function(){
-            
+        const startc=function(res){
+            console.debug('download start:',res);
+        }
+        const completec=function(res){
+            console.debug('download compleated:',res);
         }
         if(this.data.video){
-            downloadFile('video', this.data.video.durl,undefined,undefined,(pros)=>{
-                // console.debug('progress:',pros);
+            downloadFile('video', this.data.video.durl,undefined,(pros)=>{
                 var percent=pros.progress;
                 var sizeExp=filesize_exp(pros.totalBytesExpectedToWrite);
                 that.setData({savePercent:percent,size:sizeExp});

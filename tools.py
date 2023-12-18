@@ -14,6 +14,7 @@ import mylog
 import socket
 from datetime import datetime
 from typing import Any
+from urllib.parse import urlparse
 
 
 def get_host_ip():
@@ -137,6 +138,11 @@ def remote_file_info(url):
                         }
     except Exception as e:
         get_logger().error(e,exc_info=True)
+
+def get_url_host(url):
+    urlobj=urlparse(url)
+    host = urlobj.netloc
+    return host
 
 # 文本平衡组
 def tt(text:str,lc:str,rc:str)->str:

@@ -16,16 +16,19 @@ class Xhs(ThiefBase):
     def fetch(self) -> (VideoInfo | PictureInfo, bytes | list[bytes]):
         url = self.target_url
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'}
-        res = requests.get(url, headers=headers, allow_redirects=False)
+            # 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'
+            'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
+        }
+        res = requests.get(url, headers=headers, allow_redirects=True)
+        status_code = res.status_code
         html = res.text
-        real_url = res.headers.get("location")
+        url2 = res.url
         res.close()
-        # print('\t', 'rel_url:', real_url)
-        if real_url is not None:
-            res2 = requests.get(real_url, headers=headers)
-            html = res2.text
-            res2.close()
+
+        if status_code != 200:
+            msg = f'未能正常加载目标网页，status={status_code} 目标url={url} 当前url={url2}'
+            self.log.error(msg)
+            raise Exception(msg)
 
         match=re.search("window.__INITIAL_STATE__=(\{.+\})",html)
         if match is None:

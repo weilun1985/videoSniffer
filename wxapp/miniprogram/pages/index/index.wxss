@@ -24,7 +24,14 @@ page {
     height: 250rpx;
     width: 95%;
 }
-
+.size_box_left{
+    padding: 10rpx;
+    font-size: 27rpx;
+    margin: 15rpx;
+    float: left;
+    text-align: left;
+    min-width: 50rpx;
+}
 .size_box{
     padding: 10rpx;
     border: solid 1rpx #888888;

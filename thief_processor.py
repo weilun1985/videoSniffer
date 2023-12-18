@@ -136,4 +136,6 @@ def run():
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    run()
+    shared_url = 'https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
+    thief=thief_route(shared_url)
+    thief.go()

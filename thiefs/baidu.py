@@ -13,21 +13,34 @@ class Baidu(ThiefBase):
 
     def fetch(self) -> (VideoInfo | PictureInfo, bytes | list[bytes]):
         url = self.target_url
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'}
-        res = requests.get(url, headers=headers, allow_redirects=False)
+        # headers = {
+        #     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.89 Safari/537.36'}
+        headers={
+            'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0'
+        }
+        res = requests.get(url, headers=headers, allow_redirects=True)
+        status_code =res.status_code
         html = res.text
-        real_url = res.headers.get("location")
+        url2=res.url
         res.close()
-        # print('\t', 'rel_url:', real_url)
-        if real_url is not None:
-            res2 = requests.get(real_url, headers=headers)
-            html = res2.text
-            res2.close()
-        match = re.search("<title>(.*?)</title>", html)
-        title = match.group(1)
 
-        i0=html.index('window.jsonData')
+        if status_code!=200:
+            msg=f'未能正常加载目标网页，status={status_code} 目标url={url} 当前url={url2}'
+            self.log.error(msg)
+            raise Exception(msg)
+        # if res.status_code==302:
+        #     real_url = res.headers.get("location")
+        #     res.close()
+        #     res2 = requests.get(real_url, headers=headers)
+        #     html = res2.text
+        #     res2.close()
+        try:
+            i0=html.index('window.jsonData')
+        except ValueError:
+            msg = f'返回网页可能不是目标网页，status={status_code} 目标url={url} 当前url={url2}'
+            self.log.error(msg)
+            raise Exception(msg)
+
         str0=html[i0:]
         jstr = tools.tt(str0, '{', '}')
         data=json.loads(jstr)
@@ -37,6 +50,9 @@ class Baidu(ThiefBase):
         res_info.res_type = 'video'
         res_info.res_url = video_url
         res_info.share_url = url
+
+        match = re.search("<title>(.*?)</title>", html)
+        title = match.group(1)
         res_info.name = title
 
         # test_dw(res_info.res_url)
@@ -58,6 +74,7 @@ def test_dw(url):
 
 if __name__ == '__main__':
     # shared_url='https://mbd.baidu.com/newspage/data/videolanding?nid=sv_4879939042257911735&sourceFrom=share'
+    # shared_url='https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
     shared_url='https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
     baidu = Baidu(shared_url)
     info, data = baidu.fetch()
