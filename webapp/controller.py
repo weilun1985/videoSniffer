@@ -38,7 +38,6 @@ async def reslist(request: request.Request):
     return wrapper_json(data,None)
 
 @controller_bp.route("/resproxy/<res:\w+_\d+\.\w+>",methods =['GET'])
-# @controller_bp.route("/resproxy/((?<res>\w+_\d+)\.(mp4|jpg))",methods =['GET'])
 @cors(origin='*')
 async def resproxy(request: request.Request,res):
     logger.info(f'resproxy: {res}')
@@ -48,9 +47,16 @@ async def resproxy(request: request.Request,res):
     n=int(arr[1])
     return await res_proxy(id,n)
 
+@controller_bp.route("/report",methods =['POST'])
+@cors(origin='*')
+async def report(request: request.Request):
+    if len(request.body) > 0:
+        req_data = json.loads(request.body.decode("utf-8"))
+        print(req_data)
+    return wrapper_json('ok')
 
 # 包装API结果JSON
-def wrapper_json(data,exception):
+def wrapper_json(data,exception=None):
     result = {"success": True, "data": None, "errmsg": None}
     if exception is not None:
         result["success"]=False
