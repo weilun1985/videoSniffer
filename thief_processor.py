@@ -2,9 +2,10 @@ import os
 import threading
 import time
 import typing
-
+import websockets
 import tools
 import models
+import asyncio
 import message_center
 import re
 from thiefs.thiefBase import ThiefBase
@@ -41,30 +42,6 @@ def thief_go(thief,from_msg):
             send_reply(from_msg,'不好意思啊，小的无能，没能找到您要的资源。我已经记录下来了，尽快学会寻找这类资源。')
             log.warning(f'未能获取到指定资源：{thief.name} {thief.target_url}')
             return
-        # 编辑并发送回复信息
-        content=''
-        # if isinstance(info,VideoInfo):
-        #     content+=f'为您找到1个视频： \r\n1. {info.res_url}'
-        # elif isinstance(info,PictureInfo):
-        #     content+=f'为您找到{len(info.res_url_list)}张图片：'
-        #     for i in range(len(info.res_url_list)):
-        #         content+=f'\r\n{i+1}. {info.res_url_list[i]}'
-        # if tools.not_empty_str(info.name) or tools.not_empty_str(info.content):
-        #     content+=f'\r\n\r\n同时帮您取到了更多的信息如下：'
-        #     a=1
-        #     if tools.not_empty_str(info.name):
-        #         content += f'\r\n{a}. 标题：\r\n{info.name}'
-        #         a+=1
-        #     if tools.not_empty_str(info.content):
-        #         content += f'\r\n{a}. 描述：\r\n{info.content}'
-        #         a+=1
-        # content+='\r\n\r\n由于目前系统还未完善，所以需要请您拷贝上面的资源链接粘贴到浏览器中打开后手工下载。程序哥哥正在加紧开发中，为您带来的不便请见谅。。。'
-        # if isinstance(info,VideoInfo):
-        #     content+=f'为您找到1个视频，提取码为：\r\n{info.id}\r\n'
-        # elif isinstance(info,PictureInfo):
-        #     content+=f'为您找到{len(info.res_url_list)}张图片,提取码为：\r\n{info.id}\r\n'
-        # wxapp_link='#小程序://照片去水印小助手/4XbInlb8UAN27Ko'
-        # content+=f'\r\n请点击下面的链接打开提取小程序后，输入上面的提取码即可提取。由于小程序还在审核中，因此还需要您手工操作一下，给您带来的不便请见谅，程序员老哥正在加紧中……\r\n\r\n{wxapp_link}'
         if isinstance(info,VideoInfo):
             send_reply(from_msg,'为您找到1个视频，提取码为：', None)
         elif isinstance(info,PictureInfo):
@@ -116,6 +93,20 @@ def do_task(task):
         send_reply(body,default_reply)
 
 
+def ws_server_run():
+    async def main_logic(websocket, path):
+        a=0
+        while True:
+            recv_msg=await websocket.recv()
+
+            print(a,recv_msg)
+            await websocket.send(tools.simpleTimeStr(datetime.now()))
+            a+=1
+
+    start_server = websockets.serve(main_logic, '0.0.0.0', 8502)
+    asyncio.get_event_loop().run_until_complete(start_server)
+    asyncio.get_event_loop().run_forever()
+
 
 def run():
     log.info(f'Thief Processor Start At: {tools.simpleTimeStr(datetime.now())}')
@@ -136,6 +127,7 @@ def run():
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    shared_url = 'https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
-    thief=thief_route(shared_url)
-    thief.go()
+    # shared_url = 'https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
+    # thief=thief_route(shared_url)
+    # thief.go()
+    ws_server_run()
