@@ -93,19 +93,7 @@ def do_task(task):
         send_reply(body,default_reply)
 
 
-def ws_server_run():
-    async def main_logic(websocket, path):
-        a=0
-        while True:
-            recv_msg=await websocket.recv()
 
-            print(a,recv_msg)
-            await websocket.send(tools.simpleTimeStr(datetime.now()))
-            a+=1
-
-    start_server = websockets.serve(main_logic, '0.0.0.0', 8502)
-    asyncio.get_event_loop().run_until_complete(start_server)
-    asyncio.get_event_loop().run_forever()
 
 
 def run():
@@ -127,7 +115,6 @@ def run():
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    # shared_url = 'https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
-    # thief=thief_route(shared_url)
-    # thief.go()
-    ws_server_run()
+    shared_url = 'https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
+    thief=thief_route(shared_url)
+    thief.go()

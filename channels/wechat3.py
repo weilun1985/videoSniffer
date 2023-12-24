@@ -317,30 +317,38 @@ def list_newMsg_session(newMsgHandler=None):
     session_list = []
     cursess_item = sesListCtl.GetFirstChildControl()
     a, b = 0, 0
+    l=0
     while True:
         sess = WeChatUtil.parse_session_info(cursess_item)
-        sess.Me = me
-        # 如果没有新消息，则表示没有新消息。注意：不适合设置了置顶联系人的情况
-        if sess.NewMsgNum == 0:
-            break
-        a+=sess.NewMsgNum
-        session_list.append(sess)
-        # 点击当前会话，获取会话的新消息
-        cursess_item.ButtonControl(Name=sess.SessionName).Click(simulateMove=False)
-        log.info(f'session={sess.SessionName} new_msg_cnt={sess.NewMsgNum} last_msg_time={sess.LastMsgTime}')
-        new_msg_list = get_message_list(session_info=sess, max_count=sess.NewMsgNum)
-        b+=len(new_msg_list)
-        sess.MessageList = new_msg_list
-        # 触发回调
-        for msg in new_msg_list:
-            try:
-                if newMsgHandler:
-                    newMsgHandler(sess, msg)
-            except Exception as e:
-                log.error(e, exc_info=True)
-        height = cursess_item.BoundingRectangle.height()
-        # 下滑区域
-        sesListCtl.WheelDown(height)
+        if sess!=None:
+            sess.Me = me
+            # 如果连续3个没有新消息，则表示没有新消息。注意：不适合设置了置顶联系人的情况
+            if sess.NewMsgNum == 0 and l>=3:
+                    break
+            elif sess.NewMsgNum>0:
+                a+=sess.NewMsgNum
+                session_list.append(sess)
+                current_session = current_chat(wechat)
+                # 如果消息窗体不是当前会话，则点击当前会话，获取会话的新消息
+                if current_session!=sess.SessionName:
+                    cursess_item.ButtonControl(Name=sess.SessionName).Click(simulateMove=False)
+                log.info(f'session={sess.SessionName} new_msg_cnt={sess.NewMsgNum} last_msg_time={sess.LastMsgTime}')
+                new_msg_list = get_message_list(session_info=sess, max_count=sess.NewMsgNum)
+                b+=len(new_msg_list)
+                sess.MessageList = new_msg_list
+                # 触发回调
+                for msg in new_msg_list:
+                    try:
+                        if newMsgHandler:
+                            newMsgHandler(sess, msg)
+                    except Exception as e:
+                        log.error(e, exc_info=True)
+                height = cursess_item.BoundingRectangle.height()
+                # 下滑区域
+                sesListCtl.WheelDown(height)
+            else:
+                l+=1
+
         # 切换到下一条消息
         next_item=cursess_item.GetNextSiblingControl()
         if next_item is not None and next_item.Exists():
@@ -455,7 +463,6 @@ def get_message_list(session_info:WeChatSessionInfo=None, time_util=None, max_co
 
         msg_info = WeChatUtil.parse_message_info(current_msg)
         if msg_info is not None:
-            msg_info.Me=me
             if isinstance(msg_info, datetime):
                 # 将之前没有时间的消息都标注为这个时间
                 time_c = msg_info
@@ -468,6 +475,7 @@ def get_message_list(session_info:WeChatSessionInfo=None, time_util=None, max_co
                 if time_util != None and time_c < time_util:
                     break
             elif isinstance(msg_info, WeChatMessageInfo):
+                msg_info.Me = me
                 msg_info.SessionName = sess_name
                 if len(msg_list) == 0:
                     msg_list.append(msg_info)
