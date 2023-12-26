@@ -63,64 +63,6 @@ def rs_pipline(recv_msg):
         RS_MAPPER['save_res'](data)
         pass
 
-# def chrome_ctrlserver_start():
-#     async def ws_main():
-#         log.info("chrome_ctrlserver ws_main starting...")
-#         async def echo(websocket, path):
-#             log.info("chrome_ctrlserver ws_echo starting...")
-#             global __conn
-#             conn = websocket
-#             while True:
-#                 recv_msg = await websocket.recv()
-#                 rs_pipline(recv_msg)
-#
-#         async with serve(echo, '0.0.0.0', 8502):
-#             await asyncio.Future()
-#
-#     async def cmd_sender():
-#         log.info("chrome_ctrlserver cmd_sender starting...")
-#         global __conn
-#         while True:
-#             if not conn:
-#                 log.info(f"chrome_ctrlserver conn is None!")
-#                 await asyncio.sleep(0.5)
-#                 continue
-#             log.info(f"cmd_sender wait cmd...")
-#             jcmd = await cmd_queue.get()
-#             log.info(f"cmd_sender got cmd: {jcmd}")
-#             try:
-#                 await conn.send(jcmd)
-#                 log.info(f"cmd_sender send ok: {jcmd}")
-#             except Exception as e:
-#                 log.error(e,exc_info=True)
-#
-#     loop = asyncio.new_event_loop()
-#     async def run():
-#         await asyncio.gather(ws_main(),cmd_sender())
-#
-#     def sendCmd(cmdObj):
-#         jcmd = tools.obj_to_json(cmdObj)
-#         cmd_queue.put_nowait(jcmd)
-#         log.info(f'push cmd ok:{cmdObj}')
-#
-#     def start():
-#         try:
-#             asyncio.set_event_loop(loop)
-#             loop.run_until_complete(run())
-#         except Exception as e:
-#             log.error(e,exc_info=True)
-#         finally:
-#             loop.close()
-#
-#     t= threading.Thread(target=start,daemon=True,name="chrome-controller")
-#     t.start()
-#     return sendCmd
-#
-# cmdSender=chrome_ctrlserver_start()
-#
-# def cmd_fetch(url):
-#     cmdObj = {"command": "open_new_tab", "opt": {"url": url}}
-#     cmdSender(cmdObj)
 
 class General(ThiefBase):
     def target_id(self):
