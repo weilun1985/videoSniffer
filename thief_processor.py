@@ -10,6 +10,7 @@ import message_center
 import re
 from thiefs.thiefBase import ThiefBase
 from thiefs.xhs_v2 import Xhs
+from thiefs.general import General
 from thiefs.baidu import Baidu
 from datetime import datetime
 from models import WeChatMessageInfo,MailInfo,VideoInfo,PictureInfo,ResInfo
@@ -27,12 +28,12 @@ def thief_route(shared_text)->ThiefBase|None:
     thief: ThiefBase = None
     if host in ['xhslink.com','www.xiaohongshu.com']:
         thief = Xhs(url)
-    elif host == 'v.douyin.com':
-        pass
-    elif host == 'mbd.baidu.com':
-        thief=Baidu(url)
+    # elif host == 'v.douyin.com':
+    #     pass
+    # elif host == 'mbd.baidu.com':
+    #     thief=Baidu(url)
     else:
-        log.warning(f"不能处理的链接：{url}")
+        thief=General(url)
     return thief
 
 def thief_go(thief,from_msg):

@@ -249,7 +249,10 @@ function save(tabId) {
     });
     cacheData[tabId] && SetIcon({ number: cacheData[tabId].length, tabId: tabId });
     // console.log("save:",cacheData[tabId]);
-    reportToServer(cacheData[tabId]);
+    if(cacheData[tabId]&&cacheData[tabId].length>0){
+        reportToServer(tabId);
+    }
+
 }
 
 // 监听来自popup 和 options的请求
@@ -287,6 +290,7 @@ chrome.runtime.onMessage.addListener(function (Message, sender, sendResponse) {
     Message.tabId = Message.tabId ?? G.tabId;
     if (Message.Message == "getData") {
         sendResponse(cacheData[Message.tabId]);
+        console.log('getData: ',Message.tabId);
         return true;
     }
     if (Message.Message == "getButtonState") {
@@ -537,6 +541,22 @@ chrome.webNavigation.onCompleted.addListener(function (details) {
             ffmpeg.tab = 0;
         }, 500);
     }
+    // console.log('tab onCompleted: ',details.tabId,details);
+    var info={tabId:details.tabId,url:details.url};
+    ws_send('tab_compleated',info);
+    // chrome.tabs.get(details.tabId, function(tab) {
+    //     if (tab) {
+    //         console.log('Tab with ID ' + details.tabId + ' is : ' , tab);
+    //     } else {
+    //         console.log('Tab with ID ' + details.tabId + ' does not exist.');
+    //     }
+    // });
+});
+
+chrome.tabs.onCreated.addListener(function(newTab) {
+    // console.log("New tab created with ID: " + tab.id,tab);
+    var info={tabId:newTab.id,url:newTab.pendingUrl};
+    ws_send('tab_created',info);
 });
 
 //检查扩展名以及大小限制
@@ -606,6 +626,8 @@ function SetIcon(obj) {
         obj.number = obj.number > 99 ? "99+" : obj.number.toString();
         chrome.action.setBadgeText({ text: obj.number, tabId: obj.tabId }, function () { if (chrome.runtime.lastError) { return; } });
         chrome.action.setTitle({ title: "抓到 " + obj.number + " 条鱼", tabId: obj.tabId }, function () { if (chrome.runtime.lastError) { return; } });
+        console.log('set icon number: ',obj.number,obj.tabId);
+
     }
 }
 
@@ -680,7 +702,12 @@ const ws_delaySendList=[];
 const myCmds={
     open_new_tab:function (opt){
         let url=opt.url;
-        chrome.tabs.create({url:url});
+        let code=opt.code;
+        chrome.tabs.create({url:url},(newTab)=>{
+            // console.log('New tab:', newTab);
+            // var info={tabId:newTab.id,code:code,url:url};
+            // ws_send('asso',info);
+        });
     },
     close_tab:function (opt){
         let tabId=opt.tabId;
@@ -695,21 +722,21 @@ function getws(){
             websocket.onmessage = onmessage;
             websocket.onerror = onerror;
             websocket.onclose = onclose;
-            console.log('WebSocket inited.');
+            // console.log('WebSocket inited.');
         }catch (err){
             console.warn(err);
             websocket=undefined;
         }
     }
     function onopen(event){
-        console.log('WebSocket Connected to Server:',event);
+        console.log('WebSocket Connected to Server:',event.target.url);
         while (event.target.readyState===WebSocket.OPEN){
             var msg=ws_delaySendList.pop();
             if(!msg){
                 break;
             }
             event.target.send(msg);
-            console.log('WebSocket send history msg:',msg);
+            console.log('report history msg:',msg);
         }
 
     }
@@ -742,14 +769,16 @@ function getws(){
     }
     return websocket;
 }
-function reportToServer(info){
+
+function ws_send(tp,data){
     try {
-        var msg=JSON.stringify(info);
-        var socket=getws();
-        if(socket&&socket.readyState===WebSocket.OPEN){
-             socket.send(msg);
-             console.log('WebSocket send: ',msg);
-        }else{
+        var ts = Date.now();
+        var wrap={tp:tp,data:data,ts:ts};
+        var msg=JSON.stringify(wrap);
+        if(websocket&&websocket.readyState===WebSocket.OPEN){
+            websocket.send(msg);
+        }
+        else{
             ws_delaySendList.push(msg);
         }
     }catch (err){
@@ -757,6 +786,20 @@ function reportToServer(info){
     }
 }
 
+function reportToServer(tabId){
+    var list=cacheData[tabId];
+    if(list.length>0){
+        var log='';
+         list.forEach((item,i)=>{
+             log+=item.name+' ';
+         });
+         console.log('report: ',tabId,list.length,log);
+          var info={tabId:tabId,list:list};
+          ws_send('res',info);
+    }
+
+}
+getws();
 // 测试
 // chrome.storage.local.get(function (data) { console.log(data.MediaData) });
 // chrome.declarativeNetRequest.getSessionRules(function (rules) { console.log(rules); });
