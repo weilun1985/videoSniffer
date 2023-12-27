@@ -25,15 +25,15 @@ def thief_route(shared_text)->ThiefBase|None:
         return
     host = match.group(2)
     url = match.group(0)
-    thief: ThiefBase = None
-    if host in ['xhslink.com','www.xiaohongshu.com']:
-        thief = Xhs(url)
+    thief: ThiefBase = General(url)
+    # if host in ['xhslink.com','www.xiaohongshu.com']:
+    #     thief = Xhs(url)
     # elif host == 'v.douyin.com':
     #     pass
     # elif host == 'mbd.baidu.com':
     #     thief=Baidu(url)
-    else:
-        thief=General(url)
+    # else:
+    #     thief=General(url)
     return thief
 
 def thief_go(thief,from_msg):
@@ -116,6 +116,8 @@ def run():
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    shared_url = 'https://mbd.baidu.com/newspage/data/videolanding?nid=sv_7430501643266873810&sourceFrom=share'
+    # shared_url = 'https://mr.baidu.com/r/1bGdWVtNTFe?f=cp&u=c0e8da399f8386bc'
+    shared_url='http://xhslink.com/7N10cy'
     thief=thief_route(shared_url)
-    thief.go()
+    info:ResInfo= thief.go()
+    print(info.__dict__)

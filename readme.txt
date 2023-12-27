@@ -28,6 +28,7 @@ trusted-host = https://pypi.tuna.tsinghua.edu.cn
 # pip install urllib3
 # pip install certifi
 # pip install sanic websockets
+# pip install websockets -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 2）playWright相关：
 # pip install playwright

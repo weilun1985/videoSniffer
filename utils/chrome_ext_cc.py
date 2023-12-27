@@ -82,3 +82,7 @@ __cmdSender=__chrome_ctrlserver_start()
 def open_new_tab(url):
     cmdObj = {"command": "open_new_tab", "opt": {"url": url}}
     __cmdSender(cmdObj)
+
+def close_tab(tabId):
+    cmdObj = {"command": "close_tab", "opt": {"tabId": tabId}}
+    __cmdSender(cmdObj)

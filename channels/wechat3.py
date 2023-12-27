@@ -1,6 +1,6 @@
 import json
 import typing
-
+import utils.chrome_ext_cc as chromeExt
 import tools
 import wintools
 import uiautomation as auto
@@ -13,6 +13,18 @@ from models import WeChatMessageInfo,WeChatSessionInfo,FileTooLargeException
 log=tools.get_logger()
 
 WECHAT_MAX_FILE_SIZE=50*1024*1024
+
+wx_click_rqueue=queue.Queue()
+def wx_click_callback(recv_msg):
+    robj = tools.json_to_obj(recv_msg)
+    tp=robj.get('tp')
+    if tp=='tab_created':
+        print('wx_click_callback:',recv_msg)
+        data = robj.get('data')
+        wx_click_rqueue.put(data)
+
+chromeExt.add_handler(wx_click_callback)
+
 class WeChatUtil:
     @staticmethod
     def name_to_date_str(today:datetime, name):
@@ -111,21 +123,34 @@ class WeChatUtil:
             log.error(emsg)
             return False,emsg
 
+
     @staticmethod
-    def parse_link_msg(msg_info:WeChatMessageInfo):
-        remark = f'sender={msg_info.Sender}'
+    def parse_link_msg(linkbtn,msg_info:WeChatMessageInfo):
         if msg_info.MsgContent is not None:
             summary = '\r\n'.join(msg_info.MsgContent)
         msg_content={'summary':summary}
-        got, obj= WeChatUtil.fetch_page_info(remark)
-        if got:
-            url,title=obj[0],obj[1]
-            msg_content['title']=title
-            msg_content['url']=url
+        linkbtn.Click(simulateMove=False)
+        try:
+            tab=wx_click_rqueue.get(timeout=5)
+            tabId=tab.get("tabId")
+            url=tab.get("url")
+            msg_content['url'] = url
+            msg_content['tabId'] = tabId
             msg_info.MsgFullGet = True
-        else:
-            msg_info.MsgFetchError = obj
-        msg_info.MsgContent=msg_content
+            msg_info.MsgContent = msg_content
+        except queue.Empty:
+            pass
+
+        # remark = f'sender={msg_info.Sender}'
+        # got, obj= WeChatUtil.fetch_page_info(remark)
+        # if got:
+        #     url,title=obj[0],obj[1]
+        #     msg_content['title']=title
+        #     msg_content['url']=url
+        #     msg_info.MsgFullGet = True
+        # else:
+        #     msg_info.MsgFetchError = obj
+        # msg_info.MsgContent=msg_content
 
     @staticmethod
     def parse_message_info(listItem:ListItemControl):
@@ -173,8 +198,7 @@ class WeChatUtil:
 
 
         if btn_main is not None:
-            btn_main.Click(simulateMove=False)
-            WeChatUtil.parse_link_msg(msg_info)
+            WeChatUtil.parse_link_msg(btn_main,msg_info)
         match=re.match('^\[([\u4e00-\u9fa5]{2,5})\]$',name)
         if match is not None:
             msg_info.MsgContentType=match.group(1)
@@ -182,29 +206,6 @@ class WeChatUtil:
             msg_info.MsgContentType = '文本'
             msg_info.MsgContent = '\r\n'.join(msg_content)
             msg_info.MsgFullGet = True
-        # if name=='[链接]':
-        #     msg_info.MsgContentType = '链接'
-        #     btn_main.Click(simulateMove=False)
-        #     WeChatUtil.parse_link_msg(msg_info)
-        # elif name=='[视频]':
-        #     msg_info.MsgContentType = '视频'
-        #     pass
-        # elif name=='[图片]':
-        #     msg_info.MsgContentType = '图片'
-        #     pass
-        # elif name == '[文件]':
-        #     msg_info.MsgContentType = '文件'
-        #     pass
-        # elif name =='[动画表情]':
-        #     msg_info.MsgContentType = '动画表情'
-        #     pass
-        # elif name == '[音乐]':
-        #     msg_info.MsgContentType = '音乐'
-        #     pass
-        # else:
-        #     msg_info.MsgContentType = '文本'
-        #     msg_info.MsgContent=' '.join(msg_content)
-        #     msg_info.MsgFullGet=True
         name1=name.replace('\n',' ')
         log.info(
             f'fetch-msg: sender={msg_info.Sender} topic={name1} full-get={msg_info.MsgFullGet} btn-main-found:{btn_main != None} {btn_main.BoundingRectangle if btn_main != None else None} content:{msg_content}')
@@ -319,33 +320,35 @@ def list_newMsg_session(newMsgHandler=None):
     a, b = 0, 0
     l=0
     while True:
-        sess = WeChatUtil.parse_session_info(cursess_item)
-        if sess!=None:
-            sess.Me = me
-            # 如果连续3个没有新消息，则表示没有新消息。注意：不适合设置了置顶联系人的情况
-            if sess.NewMsgNum == 0 and l>=3:
-                    break
-            elif sess.NewMsgNum>0:
-                a+=sess.NewMsgNum
+        name=cursess_item.Name
+        if name.endswith('条新消息'):
+            l=0
+            sess = WeChatUtil.parse_session_info(cursess_item)
+            if sess != None and sess.NewMsgNum>0:
+                a += sess.NewMsgNum
                 session_list.append(sess)
                 current_session = current_chat(wechat)
                 # 如果消息窗体不是当前会话，则点击当前会话，获取会话的新消息
-                if current_session!=sess.SessionName:
+                if current_session != sess.SessionName:
                     cursess_item.ButtonControl(Name=sess.SessionName).Click(simulateMove=False)
                 log.info(f'session={sess.SessionName} new_msg_cnt={sess.NewMsgNum} last_msg_time={sess.LastMsgTime}')
                 new_msg_list = get_message_list(session_info=sess, max_count=sess.NewMsgNum)
-                b+=len(new_msg_list)
+                b += len(new_msg_list)
                 sess.MessageList = new_msg_list
                 # 触发回调
                 for msg in new_msg_list:
                     try:
                         if newMsgHandler:
-                            newMsgHandler(sess, msg)
+                            newMsgHandler(sess, me,msg)
                     except Exception as e:
                         log.error(e, exc_info=True)
                 height = cursess_item.BoundingRectangle.height()
                 # 下滑区域
                 sesListCtl.WheelDown(height)
+        else:
+            # 如果连续4个没有新消息，则表示没有新消息。注意：不适合设置了置顶联系人的情况
+            if l>3:
+                break
             else:
                 l+=1
 
@@ -548,14 +551,13 @@ def test_4():
 
 def test_5():
     mq = queue.Queue()
-    def fun(ses, msg):
-        print(f'received: {msg.__dict__}')
+    def fun(ses,me, msg):
+        print(f'received: me={me} sender={msg.Sender} msg={msg.__dict__}')
         mq.put(msg)
 
     while True:
-        print('start check new msg...')
+        print(f'start check new msg... mq_size={mq.qsize()}')
         list_newMsg_session(fun)
-        print(f'start reply msg, mq_size={mq.qsize()}')
         # for i in range(mq.qsize()):
         #     msg = mq.get_nowait()
         #     jstr=json.dumps(msg.MsgContent)

@@ -16,6 +16,8 @@ from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
 
+CONTENT_TYPE_VIDEO=["video/mp4", "video/x-flv", "video/ogg", "video/webm", "video/quicktime", "video/x-ms-wmv", "video/mpeg", "video/3gpp", "video/x-m4v", "video/vnd.apple.mpegurl", "application/x-mpegURL"]
+CONTENT_TYPE_IMAGE=["image/jpeg", "image/png", "image/webp", "image/tiff", "image/bmp"]
 
 def get_host_ip():
     try:

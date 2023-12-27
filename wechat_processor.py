@@ -8,9 +8,11 @@ from models import ChannelType
 log=tools.get_logger()
 
 
-def msg_handler(session,msg):
+def msg_handler(session,me,msg):
     try:
-        message_center.pushThiefTask(msg)
+        sender=msg.Sender
+        if sender!=me:
+            message_center.pushThiefTask(msg)
     except Exception as e:
         log.error(e,exc_info=True)
 

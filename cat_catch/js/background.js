@@ -31,6 +31,8 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
     }
 });
 
+var req_cnt_s=0;
+var req_cnt_e=0;
 // onBeforeRequest 浏览器发送请求之前使用正则匹配发送请求的URL
 chrome.webRequest.onBeforeRequest.addListener(
     function (data) {
@@ -40,6 +42,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 // 保存requestHeaders
 chrome.webRequest.onSendHeaders.addListener(
     function (data) {
+        req_cnt_s++;
         const requestHeaders = getRequestHeaders(data);
         requestHeaders && G.requestHeaders.set(data.requestId, requestHeaders);
     }, { urls: ["<all_urls>"] }, ['requestHeaders',
@@ -48,6 +51,7 @@ chrome.webRequest.onSendHeaders.addListener(
 // onResponseStarted 浏览器接收到第一个字节触发，保证有更多信息判断资源类型
 chrome.webRequest.onResponseStarted.addListener(
     function (data) {
+        req_cnt_e++;
         try {
             const requestHeaders = G.requestHeaders.get(data.requestId);
             if (requestHeaders) {
@@ -61,9 +65,17 @@ chrome.webRequest.onResponseStarted.addListener(
 // 删除失败的requestHeadersData
 chrome.webRequest.onErrorOccurred.addListener(
     function (data) {
+        // req_cnt_e++;
         G.requestHeaders.delete(data.requestId);
         G.blackList.delete(data.requestId);
     }, { urls: ["<all_urls>"] }
+);
+chrome.webRequest.onCompleted.addListener(
+    function(details) {
+        // req_cnt_e++;
+    },
+    {urls: ["<all_urls>"]},
+    ["responseHeaders"]
 );
 
 function findMedia(data, isRegex = false, filter = false, timer = false) {
@@ -252,7 +264,6 @@ function save(tabId) {
     if(cacheData[tabId]&&cacheData[tabId].length>0){
         reportToServer(tabId);
     }
-
 }
 
 // 监听来自popup 和 options的请求
@@ -447,6 +458,7 @@ chrome.windows.onFocusChanged.addListener(function (activeInfo) {
 // 标签更新 清理数据
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (isSpecialPage(tab.url) || tabId <= 0 || !G.initSyncComplete) { return; }
+    // console.debug('changeInfo=',changeInfo,'tab=',tab);
     if (changeInfo.status && changeInfo.status == "loading" && G.autoClearMode == 2) {
         chrome.alarms.get("save", function (alarm) {
             if (!alarm) {
@@ -456,6 +468,11 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
             }
         });
     }
+    if(changeInfo.status && changeInfo.status == "loading"){
+        req_cnt_s=0;
+        req_cnt_e=0;
+    }
+
 });
 
 // 载入frame时
@@ -541,16 +558,12 @@ chrome.webNavigation.onCompleted.addListener(function (details) {
             ffmpeg.tab = 0;
         }, 500);
     }
-    // console.log('tab onCompleted: ',details.tabId,details);
-    var info={tabId:details.tabId,url:details.url};
-    ws_send('tab_compleated',info);
-    // chrome.tabs.get(details.tabId, function(tab) {
-    //     if (tab) {
-    //         console.log('Tab with ID ' + details.tabId + ' is : ' , tab);
-    //     } else {
-    //         console.log('Tab with ID ' + details.tabId + ' does not exist.');
-    //     }
-    // });
+    if(details.url!=='about:blank'){
+        // var info={tabId:details.tabId,url:details.url};
+        // ws_send('tab_compleated',info);
+        console.log('tab onComleted: ',details)
+    }
+
 });
 
 chrome.tabs.onCreated.addListener(function(newTab) {
@@ -793,9 +806,9 @@ function reportToServer(tabId){
          list.forEach((item,i)=>{
              log+=item.name+' ';
          });
-         console.log('report: ',tabId,list.length,log);
-          var info={tabId:tabId,list:list};
-          ws_send('res',info);
+         console.log('report: ',tabId,list.length,log,req_cnt_s,req_cnt_e);
+         var info={tabId:tabId,list:list};
+         ws_send('res',info);
     }
 
 }

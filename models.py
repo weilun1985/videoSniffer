@@ -98,10 +98,12 @@ class VideoInfo(ResInfo):
         self.res_url:str=None
         self.res_file:str=None
         self.res_size:int=0
+        self.res_cover_url:str=None
 
 class PictureInfo(ResInfo):
     def __init__(self):
         self.res_url_list = []
+        self.res_size_list=[]
         self.res_file_list=[]
 
 
@@ -135,18 +137,23 @@ class ResInfoForApi:
                 'size':res.res_size if hasattr(res,'res_size') else 0
             }
         elif isinstance(res,PictureInfo):
-            urls=[]
-            durls=[]
-            a=0
-            for url in res.res_url_list:
+            urls,durls,sizes=[],[],[]
+            n=len(res.res_url_list)
+            sn=len(res.res_size_list) if hasattr(res,'res_size_list') else 0
+            has_size=(n>0 and sn==n)
+            for i in range(n):
+                url=res.res_url_list[i]
                 urls.append(url)
                 durl=url
                 if not is_host_in_wxdw(durl):
-                    durl = f'{host}{res.id}_{a}.jpg'
+                    durl = f'{host}{res.id}_{i}.jpg'
                 durls.append(durl)
-                a+=1
+                if has_size:
+                    sizes.append(res.res_size_list[i])
             index_info.image={
                 'urls':urls,
                 'durls':durls
             }
+            if has_size:
+                index_info.image['sizes']=sizes
         return index_info
