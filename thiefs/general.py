@@ -25,34 +25,36 @@ def rs_mapper():
         res_dict[tabId]=reslist
         res_queue.put(res)
 
-    def hasTask(url):
-        tabId = url_tab.get(url)
-        if tabId:
+    def hasTask(url,tabId):
+        if (url and url_tab.get(url)):
             return True
+        if tabId:
+            for tid in url_tab.values():
+                if tid==tabId:
+                    return True
         return False
 
-    def getResByUrl(url):
+    def getRes(url,tabId):
         info=None
-        tabId=url_tab.pop(url,None)
+        if not tabId:
+            tabId=url_tab.pop(url,None)
         if tabId:
             info=res_dict.pop(tabId,None)
         return info
 
-    def waitResByUrl(url):
-        info=getResByUrl(url)
+    def waitRes(url,tabId):
+        info=getRes(url,tabId)
         if not info:
             while True:
                 try:
                     res_queue.get(timeout=30)
-                    info = getResByUrl(url)
+                    info = getRes(url,tabId)
                     if info:
                         break
                 except queue.Empty:
                     break
         return info
 
-    def getResByTabId(tabId):
-        return res_dict.get(tabId)
 
     def ls():
         print('----url-tabId mapping----------')
@@ -65,9 +67,8 @@ def rs_mapper():
     return {
         'save_res':save_res,
         'save_asso':save_asso,
-        'getResByUrl':getResByUrl,
-        'getResByTabId':getResByTabId,
-        'waitResByUrl':waitResByUrl,
+        'getRes':getRes,
+        'waitRes':waitRes,
         'hasTask':hasTask,
         'ls':ls
     }
@@ -94,14 +95,15 @@ class General(ThiefBase):
 
     def fetch(self) -> (VideoInfo | PictureInfo, bytes | list[bytes]):
         url = self.target_url
+        tabId=self.sharedObj.get('tabId')
         # 先看看队列里有没有
-        r0=RS_MAPPER['getResByUrl'](url)
+        r0=RS_MAPPER['getRes'](url,tabId)
         # 如果没有则检查是否在加载中
         if not r0:
-            task=RS_MAPPER['hasTask'](url)
+            task=RS_MAPPER['hasTask'](url,tabId)
             if not task:
                 chromeExt.open_new_tab(url)
-        r0=RS_MAPPER['waitResByUrl'](url)
+        r0=RS_MAPPER['waitRes'](url,tabId)
 
         if not r0 or len(r0)==0:
             return None
@@ -161,7 +163,7 @@ if __name__ == '__main__':
         url=input('请输入网址:').strip()
         chromeExt.open_new_tab(url)
         RS_MAPPER['ls']()
-        result=RS_MAPPER['waitResByUrl'](url)
+        result=RS_MAPPER['waitRes'](url,None)
         print('result:',result)
 
     print('run ok')

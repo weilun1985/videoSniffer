@@ -8,33 +8,12 @@ import models
 import asyncio
 import message_center
 import re
-from thiefs.thiefBase import ThiefBase
-from thiefs.xhs_v2 import Xhs
-from thiefs.general import General
-from thiefs.baidu import Baidu
+from thiefs.thiefFactory import get_thief
 from datetime import datetime
 from models import WeChatMessageInfo,MailInfo,VideoInfo,PictureInfo,ResInfo
 
 log=tools.get_logger()
 
-
-
-def thief_route(shared_text)->ThiefBase|None:
-    match = re.search('(http|https)://([\w\.]+)/[\w/?=&]+', shared_text)
-    if match is None:
-        return
-    host = match.group(2)
-    url = match.group(0)
-    thief: ThiefBase = General(url)
-    if host in ['xhslink.com','www.xiaohongshu.com']:
-        thief = Xhs(url)
-    # elif host == 'v.douyin.com':
-    #     pass
-    # elif host == 'mbd.baidu.com':
-    #     thief=Baidu(url)
-    # else:
-    #     thief=General(url)
-    return thief
 
 def thief_go(thief,from_msg):
     try:
@@ -67,22 +46,15 @@ def send_reply(from_message,reply,fiels=None):
 
 def do_task(task):
     thief = None
-    shared_text = None
     body=task.MessageBody
+    sharedObj=None
     if isinstance(body,WeChatMessageInfo):
-        content=body.MsgContent
-        if isinstance(content,str):
-            shared_text=content
-        elif isinstance(content,typing.Dict):
-            shared_text=content.get('url')
-        elif isinstance(content,typing.List):
-            shared_text=' '.join(content)
-
+        sharedObj=body.MsgContent
     elif isinstance(body,MailInfo):
         pass
 
-    if shared_text is not None:
-        thief = thief_route(shared_text)
+    if sharedObj:
+        thief = get_thief(sharedObj)
     if thief is not None:
         send_reply(body,'任务已收到，正在处理中，稍后返回您结果。')
         # 新起一个线程来跑
@@ -114,10 +86,13 @@ def run():
             log.error(e,exc_info=True)
             time.sleep(1)
 
+
+
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
+
     # shared_url = 'https://mr.baidu.com/r/1bGdWVtNTFe?f=cp&u=c0e8da399f8386bc'
     shared_url='http://xhslink.com/7N10cy'
-    thief=thief_route(shared_url)
+    thief=get_thief(shared_url)
     info:ResInfo= thief.go()
     print(info.__dict__)

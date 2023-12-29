@@ -19,7 +19,7 @@ def wx_click_callback(recv_msg):
     robj = tools.json_to_obj(recv_msg)
     tp=robj.get('tp')
     if tp=='tab_created':
-        print('wx_click_callback:',recv_msg)
+        log.info(f'wx_click_callback:{recv_msg}')
         data = robj.get('data')
         wx_click_rqueue.put(data)
 

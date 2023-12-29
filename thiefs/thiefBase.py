@@ -1,7 +1,10 @@
 # 下载器基类
 import abc,os
 import json
+import re
 import sys,logging
+import typing
+
 import requests
 
 import message_center
@@ -15,11 +18,33 @@ download_root_dir=os.path.join(app_root_dir,'download')
 # print('download-root-dir:',download_root_dir)
 class ThiefBase(metaclass=abc.ABCMeta):
 
-    def __init__(self,target_url):
-        self.target_url=target_url
+    @staticmethod
+    def analyzing(shareObj):
+        url, host, shared_text = None, None, None
+        if isinstance(shareObj, str):
+            shared_text = shareObj
+        elif isinstance(shareObj, typing.Dict):
+            shared_text = shareObj.get('url')
+        elif isinstance(shareObj, typing.List):
+            shared_text = ' '.join(shareObj)
+        if shared_text:
+            match = re.search('(http|https)://([\w\.]+)/[\w/?=&]+', shared_text)
+            if match is not None:
+                host = match.group(2)
+                url = match.group(0)
+        return url,host,shared_text
+
+    def __init__(self,sharedObj,target_url:str=None):
+        self.sharedObj=sharedObj
+        self.target_url = target_url
+        if not self.target_url:
+            url,host,stxt=self.analyzing(sharedObj)
+            if url:
+                self.target_url=url
         self.download_dir=os.path.join(download_root_dir,self.name)
         self.download_picture_dir=os.path.join(self.download_dir,'pictures')
         self.download_video_dir = os.path.join(self.download_dir,'videos')
+
 
     @property
     def log(self):
