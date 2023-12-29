@@ -26,8 +26,8 @@ def thief_route(shared_text)->ThiefBase|None:
     host = match.group(2)
     url = match.group(0)
     thief: ThiefBase = General(url)
-    # if host in ['xhslink.com','www.xiaohongshu.com']:
-    #     thief = Xhs(url)
+    if host in ['xhslink.com','www.xiaohongshu.com']:
+        thief = Xhs(url)
     # elif host == 'v.douyin.com':
     #     pass
     # elif host == 'mbd.baidu.com':

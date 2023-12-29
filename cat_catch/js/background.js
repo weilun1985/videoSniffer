@@ -3,7 +3,7 @@ importScripts("/js/init.js");
 // Service Worker 5分钟后会强制终止扩展
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1271154
 // https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension/70003493#70003493
-chrome.webNavigation.onBeforeNavigate.addListener(function () { return; });
+// chrome.webNavigation.onBeforeNavigate.addListener(function () { return; });
 chrome.webNavigation.onHistoryStateUpdated.addListener(function () { return; });
 chrome.runtime.onConnect.addListener(function (Port) {
     if (Port.name !== "HeartBeat") return;
@@ -31,18 +31,42 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
     }
 });
 
-var req_cnt_s=0;
-var req_cnt_e=0;
+const tabStatus={};
+const tabReqCnt={};
+function set_reqcnt_s(tabId){
+    if(tabReqCnt[tabId]){
+        let req_cnt_s=tabReqCnt[tabId][0];
+        tabReqCnt[tabId][0]=req_cnt_s+1;
+
+    }else{
+        tabReqCnt[tabId]=[1,0];
+    }
+     return tabReqCnt[tabId];
+}
+function set_reqcnt_e(tabId){
+    if(tabReqCnt[tabId]){
+        let req_cnt_e=tabReqCnt[tabId][1];
+        tabReqCnt[tabId][1]=req_cnt_e+1;
+    }else{
+        tabReqCnt[tabId]=[1,1];
+    }
+    return tabReqCnt[tabId];
+}
 // onBeforeRequest 浏览器发送请求之前使用正则匹配发送请求的URL
 chrome.webRequest.onBeforeRequest.addListener(
     function (data) {
+        if(['image','media'].includes(data.type)){
+            set_reqcnt_s(data.tabId);
+            // req_cnt_s++;
+            // console.debug(`webRequest.onBeforeRequest: G.tabId=${G.tabId} data.tabId=${data.tabId} data.type=${data.type} data.requestId=${data.requestId} req-cnt=${req_cnt_s}/${req_cnt_e} ${data.url}`);
+        }
         try { findMedia(data, true); } catch (e) { console.log(e); }
     }, { urls: ["<all_urls>"] }, ["requestBody"]
 );
 // 保存requestHeaders
 chrome.webRequest.onSendHeaders.addListener(
     function (data) {
-        req_cnt_s++;
+        // req_cnt_s++;
         const requestHeaders = getRequestHeaders(data);
         requestHeaders && G.requestHeaders.set(data.requestId, requestHeaders);
     }, { urls: ["<all_urls>"] }, ['requestHeaders',
@@ -51,7 +75,9 @@ chrome.webRequest.onSendHeaders.addListener(
 // onResponseStarted 浏览器接收到第一个字节触发，保证有更多信息判断资源类型
 chrome.webRequest.onResponseStarted.addListener(
     function (data) {
-        req_cnt_e++;
+        if(['image','media'].includes(data.type)) {
+            // req_cnt_e++;
+        }
         try {
             const requestHeaders = G.requestHeaders.get(data.requestId);
             if (requestHeaders) {
@@ -65,14 +91,22 @@ chrome.webRequest.onResponseStarted.addListener(
 // 删除失败的requestHeadersData
 chrome.webRequest.onErrorOccurred.addListener(
     function (data) {
-        // req_cnt_e++;
+         if(['image','media'].includes(data.type)) {
+             se=set_reqcnt_e(data.tabId);
+             // req_cnt_e++
+             // console.debug(`webRequest.onErrorOccurred: G.tabId=${G.tabId} data.tabId=${data.tabId} data.type=${data.type} data.requestId=${data.requestId} req-cnt=${se[0]}/${se[1]} ${data.url}`);
+         }
         G.requestHeaders.delete(data.requestId);
         G.blackList.delete(data.requestId);
     }, { urls: ["<all_urls>"] }
 );
 chrome.webRequest.onCompleted.addListener(
-    function(details) {
-        // req_cnt_e++;
+    function(data) {
+         if(['image','media'].includes(data.type)) {
+             se=set_reqcnt_e(data.tabId);
+             // req_cnt_e++
+             // console.debug(`webRequest.onCompleted: G.tabId=${G.tabId} data.tabId=${data.tabId} data.type=${data.type} data.requestId=${data.requestId} req-cnt=${se[0]}/${se[1]} ${data.url}`);
+         }
     },
     {urls: ["<all_urls>"]},
     ["responseHeaders"]
@@ -468,7 +502,10 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
             }
         });
     }
-    if(changeInfo.status && changeInfo.status == "loading"){
+    if(changeInfo.status) {
+        tabStatus[tabId] = changeInfo.status;
+    }
+    if(changeInfo.status && changeInfo.status === "loading"){
         req_cnt_s=0;
         req_cnt_e=0;
     }
@@ -477,7 +514,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 // 载入frame时
 chrome.webNavigation.onCommitted.addListener(function (details) {
-    // console.log(details);
+    console.debug('webNavigation.onCommitted',details.tabId);
     if (isSpecialPage(details.url) || details.tabId <= 0 || !G.initSyncComplete) { return; }
 
     // 刷新清理角标数
@@ -559,12 +596,18 @@ chrome.webNavigation.onCompleted.addListener(function (details) {
         }, 500);
     }
     if(details.url!=='about:blank'){
-        // var info={tabId:details.tabId,url:details.url};
-        // ws_send('tab_compleated',info);
-        console.log('tab onComleted: ',details)
+        se=tabReqCnt[details.tabId];
+        console.log(`webNavigation.onCompleted: req_cnt=${se[1]}/${se[0]}`)
+        tabStatus[details.tabId] ='complete';
     }
 
 });
+
+chrome.webNavigation.onBeforeNavigate.addListener(function (details){
+    console.debug('webNavigation.onBeforeNavigate',details.tabId,details.url);
+    tabReqCnt[details.tabId]=[0,0];
+});
+
 
 chrome.tabs.onCreated.addListener(function(newTab) {
     // console.log("New tab created with ID: " + tab.id,tab);
@@ -799,16 +842,46 @@ function ws_send(tp,data){
     }
 }
 
-function reportToServer(tabId){
+function report_to_server(tabId){
     var list=cacheData[tabId];
     if(list.length>0){
-        var log='';
+         var log='';
          list.forEach((item,i)=>{
-             log+=item.name+' ';
+             log+='\r\n'+item.name;
          });
-         console.log('report: ',tabId,list.length,log,req_cnt_s,req_cnt_e);
+         se=tabReqCnt[tabId];
+         console.log(`report at ${Date.now()}: tabId=${tabId} tab-status=${tabStatus[tabId]} req_cnt=${se[1]}/${se[0]} res-count:${list.length} ${log}`);
          var info={tabId:tabId,list:list};
          ws_send('res',info);
+    }
+}
+var report_waits={};
+function reportToServer(tabId){
+    let wait_report=report_waits[tabId];
+    if(!wait_report){
+        console.log('no wati_report.')
+    }
+    if(wait_report&&wait_report.waiting){
+        return false;
+    }
+
+    var list=cacheData[tabId];
+    let tab_status=tabStatus[tabId];
+    let req_cnt_s=tabReqCnt[tabId][0];
+    let req_cnt_e=tabReqCnt[tabId][1];
+    console.log(`try report at ${Date.now()}: tabId=${tabId} tabstatus=${tab_status} res-count=${list.length} req_cnt=${req_cnt_e}/${req_cnt_s}`);
+    if(list.length>0){
+        if(tab_status==='complete'&&req_cnt_e>0&&req_cnt_e>=req_cnt_s){
+            report_to_server(tabId);
+        }else{
+            let wait_cnt=wait_report?wait_report.cnt:0;
+            report_waits[tabId]={waiting:true,cnt:++wait_cnt};
+            console.log(`report will delay run， tabId=${tabId} count=${wait_cnt} REASON:tabstatus=${tab_status} req_cnt=${req_cnt_e}/${req_cnt_s} time=${Date.now()}`);
+            setTimeout(()=>{
+                report_waits[tabId].waiting=false;
+                reportToServer(tabId)
+            },3000);
+        }
     }
 
 }
