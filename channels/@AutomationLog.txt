@@ -201,4 +201,4 @@ ControlType: ButtonControl}
 2023-12-31 04:32:45.687 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
 2023-12-31 04:32:47.616 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ClassName: 'SelectContactWnd', ControlType: WindowControl}
 2023-12-31 04:32:47.648 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
-2023-12-31 04:32:51.165 pydevd_repr_utils.py[213] get_value_repr -> 
+2023-12-31 04:32:51.165 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-31 05:59:21.822 wechat3.py[595] open_reswxapp -> 

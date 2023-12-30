@@ -12,7 +12,7 @@ from typing import List,Any
 from models import WeChatMessageInfo,WeChatSessionInfo,FileTooLargeException
 
 log=tools.get_logger()
-
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 WECHAT_MAX_FILE_SIZE=50*1024*1024
 
 wx_click_rqueue=queue.Queue()
@@ -563,7 +563,9 @@ def reswxapp_reload():
     auto.SetClipboardText('')
     wxapp=open_reswxapp()
     x1,y1,x2,y2=reswxapp_menu_click(wxapp)
-    autogui.click(x2, y2)
+
+    location = autogui.locateOnScreen(os.path.join(CURRENT_DIR,'reload.png'))
+    autogui.click(location.left, location.top)
     time.sleep(1)
 
 def reswxapp_share(session_name,resId):
@@ -572,7 +574,9 @@ def reswxapp_share(session_name,resId):
     time.sleep(1)
     wxapp = open_reswxapp()
     x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
-    autogui.click(x1, y1)
+    location = autogui.locateOnScreen(os.path.join(CURRENT_DIR,'share.png'))
+    # autogui.click(x1, y1)
+    autogui.click(location.left, location.top)
 
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
     auto.WaitForExist(shchat, 10)
@@ -621,7 +625,7 @@ def test_6():
     send_file('Li',file)
 
 def test_7():
-    match = re.match(r'^res:(\w{32})$', 'res:26d8edd99e7c05a224e7b00d426bfcfa')
+    match = re.match(r'^res:(\w{32})$', 'res:e7928fbe531c079088f25eb935006f38')
     resId=match.group(1)
     sess_name='文件传输助手'
     send_reswxapp(sess_name,resId)
