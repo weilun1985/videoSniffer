@@ -1,8 +1,8 @@
 // index.js
-const app = getApp()
+const app = getApp();
 const { envList } = require('../../envList.js');
-const { downloadFile, downloadFiles,filesize_exp } = require('../../utils')
-
+const { downloadFile, downloadFiles,filesize_exp } = require('../../utils');
+const resIdRex=/^\w{32}$/ig;
 Page({
     data: {
         id:null,
@@ -11,8 +11,12 @@ Page({
         console.log('on load: options='+JSON.stringify(options));
         if(options&&options.id){
             let id=options.id;
+            console.log(`url id=${id} isRedId=${resIdRex.test(id)}`);
             this.setData({id:id});
             this.loadResInfo(id);
+            // this.checkReset();
+        }else{
+            this.autoFillResId();
         }
     },
     onPlay:function(e){
@@ -20,9 +24,16 @@ Page({
         const myVideoContext = wx.createVideoContext('myVideo');
     },
     resId_input(e){
-        this.setData({
-            id:e.detail.value
-        })
+        const value=e.detail.value;
+        const keycode=e.detail.keycode;
+        console.debug(`key=${keycode} value=${value}`);
+        if(keycode==13){
+            console.debug(`回车：value=${value}`);
+        }else{
+            this.setData({
+                id:e.detail.value
+            })
+        }
         console.log('set-id:'+e.detail.value);
     },
     submitResId(){
@@ -33,9 +44,9 @@ Page({
         //     console.debug('value=',value);
         // })
         var id=this.data.id;
-        if(id&&id.length>0){
+        if(id&&id.length>0&&resIdRex.test(id)){
             console.log('To get res: '+id);
-            var url= `/pages/index/index?id=${id}`
+            var url= `/pages/index/index?id=${id}`;
             console.log(url)
             wx.redirectTo({
                 url: url,
@@ -43,10 +54,58 @@ Page({
         }else{
             console.warn('no id');
             wx.showToast({
-                title: '资源ID不能为空',
+                title: '资源ID错误',
                 icon: 'none',
             })
         }
+    },
+    // checkReset(){
+    //     wx.getClipboardData({
+    //         success: res => {
+    //           var cmd=res.data;
+    //           if(cmd=='@reset'){
+    //             wx.setClipboardData({
+    //                 data: '',
+    //             })
+    //             var url= `/pages/index/index`;
+    //             console.log(url)
+    //             wx.redirectTo({
+    //                 url: url,
+    //             })
+    //           }
+    //           else{
+    //             console.log('wait for reset cmd...');
+    //               setTimeout(this.autoFillResId,1000);
+    //           }
+    //         }
+    //       });
+    // },
+    autoFillResId(){
+        wx.getClipboardData({
+            success: res => {
+              var resId=res.data;
+              if(resIdRex.test(resId)){
+                this.setData({
+                    id:resId
+                })
+                wx.setClipboardData({
+                    data: '',
+                })
+                var url= `/pages/index/index?id=${resId}`;
+                console.log(url)
+                wx.redirectTo({
+                    url: url,
+                })
+              }
+              else{
+                  console.log('no resId in clipboard, retry next.');
+                  setTimeout(this.autoFillResId,1000);
+              }
+            },
+            fail: err => {
+              console.log('获取剪贴板内容失败：', err);
+            },
+          });
     },
     //轮播图的切换事件
     swiperChange: function (e) {
@@ -96,6 +155,10 @@ Page({
                         url=url.replace('http://','https://');
                         data.video.url=url;
                     }
+                    if(data.video.size&&data.video.size>0){
+                        data.size=filesize_exp(data.video.size);
+                    }
+
                 }else if(data.res_type==='picture'){
                     for(let i=0;i<data.image.urls.length;i++){
                         let url=data.image.urls[i];

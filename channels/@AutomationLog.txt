@@ -135,4 +135,70 @@ ControlType: ButtonControl}
 2023-12-17 22:46:35.004 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ControlType: TextControl}
 2023-12-17 22:46:37.160 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ControlType: ButtonControl}
 2023-12-17 22:46:37.239 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ControlType: TextControl}
-2023-12-17 22:46:42.010 pydevd_repr_utils.py[213] get_value_repr -> 
+2023-12-17 22:46:42.010 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-30 13:17:13.550 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 13:17:13.569 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 13:17:23.400 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 13:17:25.830 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 13:17:25.857 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 13:17:33.931 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 13:17:44.371 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 13:17:54.740 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 13:18:08.568 pydevd_repr_utils.py[171] repr_instance -> 2023-12-30 13:18:08.569 pydevd_repr_utils.py[171] repr_instance -> 2023-12-30 22:05:02.912 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 22:05:02.938 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:05:13.494 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:05:13.494 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 22:05:13.774 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 22:05:13.787 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:05:20.868 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 22:05:25.502 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:05:25.503 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 22:05:32.848 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '菜单', ControlType: ButtonControl}
+2023-12-30 22:05:44.854 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:05:56.909 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-30 22:09:14.481 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:09:22.450 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:09:25.517 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:09:34.591 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:09:34.602 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: WindowControl}
+2023-12-30 22:09:46.719 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-31 00:23:06.773 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {ControlType: EditControl}
+2023-12-31 00:23:08.466 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {ControlType: EditControl}
+2023-12-31 00:23:10.786 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {ControlType: EditControl}
+2023-12-31 00:23:16.804 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ControlType: EditControl}
+2023-12-31 00:23:18.495 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ControlType: EditControl}
+2023-12-31 00:23:20.803 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-31 00:34:20.426 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:21.975 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:25.207 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:30.458 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:32.006 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:35.230 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:45.266 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:34:55.304 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:35:05.335 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:35:15.367 pydevd_resolver.py[178] _getPyDictionary -> 2023-12-31 00:36:29.676 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:36:38.226 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:36:39.710 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:36:48.254 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:36:50.484 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:37:00.517 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:37:10.540 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:37:20.559 pydevd_resolver.py[178] _getPyDictionary -> 2023-12-31 00:40:44.046 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:40:54.084 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:00.784 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:03.953 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:10.816 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:13.993 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:24.040 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:34.069 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:44.097 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '转发给朋友', ControlType: TextControl}
+2023-12-31 00:41:54.129 pydevd_resolver.py[178] _getPyDictionary -> 2023-12-31 04:32:12.198 wechat3.py[580] reswxapp_share -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:24.391 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:33.821 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:35.001 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:35.028 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:36.589 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {ClassName: 'SelectContactWnd', ControlType: WindowControl}
+2023-12-31 04:32:36.645 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:39.663 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:44.568 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:45.687 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:47.616 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ClassName: 'SelectContactWnd', ControlType: WindowControl}
+2023-12-31 04:32:47.648 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
+2023-12-31 04:32:51.165 pydevd_repr_utils.py[213] get_value_repr -> 

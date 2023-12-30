@@ -1,3 +1,4 @@
+import re
 import time
 import message_center
 from channels import wechat3
@@ -42,7 +43,12 @@ def run():
                     break
                 c=c+1
                 if send_info.Content is not None:
-                    wechat3.send_msg(send_info.To, send_info.Content)
+                    match=re.match(r'^res:(\w{32})$',send_info.Content)
+                    if match:
+                        resId=match.group(1)
+                        wechat3.send_reswxapp(send_info.To,resId)
+                    else:
+                        wechat3.send_msg(send_info.To, send_info.Content)
                 if send_info.Files is not None:
                     for file in send_info.Files:
                         log.info(f'send-file-to "{send_info.To}": {file}')

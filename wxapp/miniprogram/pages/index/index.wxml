@@ -34,7 +34,7 @@
             <view wx:if="{{size}}" class="size_box">{{size}}</view>
         </view>
        
-        <textarea class="info" data-show='yes' value=" {{info}}"></textarea>
+        <textarea class="info" data-show='yes' value="{{info}}"></textarea>
         <view class="button_area">
             <view class="button" bind:tap="download">保存到相册</view>
         </view>
@@ -47,8 +47,7 @@
         <view>{{message?message:'资源加载中，请稍后'}}</view>
     </block> -->
     <block wx:else="">
-        <textarea id="resId_input" class="resId_input"  bindinput="resId_input" placeholder="请输入资源ID进行提取。您先需要加下面的机器人微信号，然后对应资源分享给机器人，稍后机器人就会发送提取的资源ID给您。" value="{{id}}"></textarea>
-        
+        <textarea id="resId_input" class="resId_input" focus="true" bindinput="resId_input" placeholder="请输入资源ID进行提取。您先需要加下面的机器人微信号，然后对应资源分享给机器人，稍后机器人就会发送提取的资源ID给您。" value="{{id}}"></textarea>
         <view class="button_area">
             <view class="button" bind:tap="submitResId">提取资源</view>
         </view>

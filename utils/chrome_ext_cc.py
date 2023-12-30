@@ -43,7 +43,7 @@ def __chrome_ctrlserver_start():
         global __conn
         while True:
             if not __conn:
-                log.info(f"chrome_ctrlserver conn is None!")
+                # log.info(f"chrome_ctrlserver conn is None!")
                 await asyncio.sleep(0.5)
                 continue
             log.info(f"cmd_sender wait cmd...")

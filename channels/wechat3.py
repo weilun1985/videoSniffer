@@ -4,6 +4,7 @@ import utils.chrome_ext_cc as chromeExt
 import tools
 import wintools
 import uiautomation as auto
+import pyautogui as autogui
 import logging,math,os,queue,re,time
 from uiautomation import WindowControl,ListControl,ButtonControl,TextControl,EditControl,ListItemControl,DocumentControl,PropertyId
 from datetime import datetime,timedelta
@@ -543,10 +544,59 @@ def check_new_msg(handler):
     return a,b
 
 
+def reswxapp_menu_click(wxapp):
+    menuBtn = wxapp.ButtonControl(Name='菜单')
+    auto.WaitForExist(menuBtn, timeout=2)
+    boundR = menuBtn.BoundingRectangle
+    l0, t0, r0, b0 = boundR.left, boundR.top, boundR.right, boundR.bottom
+    # 分享按钮的坐标
+    l1, t1, r1, b1 = l0 - 242, t0 + 166, r0 - 237, b0 + 216
+    x1, y1 = l1 + 10, t1 + 10
+    # 重载按钮的坐标
+    l2, t2, r2, b2 = l0 - 166, t0 + 307, r0 - 160, b0 + 358
+    x2, y2 = l2 + 10, t2 + 10
+    menuBtn.Click(simulateMove=False)
+    return x1,y1,x2,y2
 
+def reswxapp_reload():
+    # 清空剪切板，并重载小程序
+    auto.SetClipboardText('')
+    wxapp=open_reswxapp()
+    x1,y1,x2,y2=reswxapp_menu_click(wxapp)
+    autogui.click(x2, y2)
+    time.sleep(1)
 
-def test_4():
-    send_msg('我我我',f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+def reswxapp_share(session_name,resId):
+    # 将资源ID写入剪切板，待小程序自动读取
+    auto.SetClipboardText(resId)
+    time.sleep(1)
+    wxapp = open_reswxapp()
+    x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
+    autogui.click(x1, y1)
+
+    shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
+    auto.WaitForExist(shchat, 10)
+    search = shchat.EditControl(Name='搜索')
+    search.Click(simulateMove=False)
+    auto.SetClipboardText(session_name)
+    search.SendKeys('{Ctrl}a')
+    search.SendKeys('{Ctrl}v', waitTime=0.1)
+    search.SendKeys('{Enter}', waitTime=0.1)
+    sendbtn = shchat.ButtonControl(Name='发送')
+    sendbtn.Click(simulateMove=False)
+
+def open_reswxapp():
+    wxapp = auto.PaneControl(searchDepth=1, Name='照片去水印小助手', ClassName='Chrome_WidgetWin_0')
+    auto.WaitForExist(wxapp, timeout=2)
+    wxapp.SetActive()
+    return wxapp
+
+def send_reswxapp(session_name,resId):
+    reswxapp_reload()
+    reswxapp_share(session_name,resId)
+
+    pass
+
 
 
 def test_5():
@@ -570,9 +620,13 @@ def test_6():
     file=r"E:\myworking\myprojects\xiaohongshu_downloader\download\Xhs\videos\01e5594329b536aa010370038be4b08976_258.mp4"
     send_file('Li',file)
 
-
+def test_7():
+    match = re.match(r'^res:(\w{32})$', 'res:26d8edd99e7c05a224e7b00d426bfcfa')
+    resId=match.group(1)
+    sess_name='文件传输助手'
+    send_reswxapp(sess_name,resId)
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    test_5()
+    test_7()
     pass

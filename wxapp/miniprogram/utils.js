@@ -107,14 +107,17 @@ function downloadFiles(type, urls, completec,progressc,startc) {
 //保存完成
 function saveCompleted(success_cnt, fail_cnt, completec, errMsgs) {
     wx.hideLoading();
-    let errMsg = '无';
+    let errMsg = null;
     if (errMsgs.length) {
         errMsg = errMsgs.join('\n');
     }
-
+    var msg=`成功${success_cnt}项`+(fail_cnt>0?`,失败${fail_cnt}项`:'');
+    if(fail_cnt>0&&errMsgs){
+        msg+=`\r\n失败原因:\n${errMsg}`;
+    }
     wx.showModal({
-        title: `成功${success_cnt}项，失败${fail_cnt}项`,
-        content: `失败信息:\n${errMsg}`,
+        title: `下载完成`,
+        content: msg,
         showCancel: false,
         success(res) {
             if (res.confirm) {

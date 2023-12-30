@@ -23,15 +23,16 @@ def thief_go(thief,from_msg):
             log.warning(f'未能获取到指定资源：{thief.name} {thief.target_url}')
             return
         if isinstance(info,VideoInfo):
-            send_reply(from_msg,'为您找到1个视频，提取码为：', None)
+            send_reply(from_msg,'为您找到1个视频:', None)
         elif isinstance(info,PictureInfo):
-            send_reply(from_msg,f'为您找到{len(info.res_url_list)}张图片,提取码为：', None)
+            send_reply(from_msg,f'为您找到{len(info.res_url_list)}张图片:', None)
         else:
-            send_reply(from_msg, '已为您找到对应资源，提取码为：', None)
-        send_reply(from_msg, info.id, None)
-        wxapp_link = '#小程序://照片去水印小助手/4XbInlb8UAN27Ko'
-        content = f'请点击下面的链接打开提取小程序后，输入上面的提取码即可提取。由于小程序还在审核中，因此还需要您手工操作一下，给您带来的不便请见谅，程序员老哥正在加紧中……\r\n\r\n{wxapp_link}'
-        send_reply(from_msg,content,None)
+            send_reply(from_msg, '已为您找到对应资源:', None)
+        # send_reply(from_msg, info.id, None)
+        send_reply(from_msg,f'res:{info.id}',None)
+        # wxapp_link = '#小程序://照片去水印小助手/4XbInlb8UAN27Ko'
+        # content = f'请点击下面的链接打开提取小程序后，输入上面的提取码即可提取。由于小程序还在审核中，因此还需要您手工操作一下，给您带来的不便请见谅，程序员老哥正在加紧中……\r\n\r\n{wxapp_link}'
+        # send_reply(from_msg,content,None)
     except Exception as e:
         log.error(e, exc_info=True)
         reply = f'哎呀呀，不好意思我出问题了，需要休息一下，请您稍后再试。'
