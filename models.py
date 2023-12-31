@@ -25,6 +25,7 @@ class WeChatMessageInfo:
         self.MsgContentType:str=None
         self.MsgFullGet:bool=False
         self.MsgFetchError:str=None
+        self.RecvTime:int=None
 
 class WeChatSendInfo:
     def __init__(self):

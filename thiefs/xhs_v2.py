@@ -32,7 +32,7 @@ class Xhs(ThiefBase):
 
         match=re.search("window.__INITIAL_STATE__=(\{.+\})",html)
         if match is None:
-            return
+            return None,None
         jstr=match.group(1)
         jstr=jstr.replace('undefined','null')
         data=json.loads(jstr)

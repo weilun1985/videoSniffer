@@ -1,4 +1,6 @@
 import asyncio
+import queue
+
 import tools
 import threading
 from websockets import serve
@@ -25,6 +27,14 @@ def remove_handler(handler):
     __recv_handlers.remove(handler)
 
 def __chrome_ctrlserver_start():
+    async def cmd_send(jcmd):
+        log.info(f"cmd_sender got cmd: {jcmd}")
+        try:
+            await __conn.send(jcmd)
+            log.info(f"cmd_sender send ok: {jcmd}")
+        except Exception as e:
+            log.error(e, exc_info=True)
+
     async def ws_main():
         log.info("chrome_ctrlserver ws_main starting...")
         async def echo(websocket, path):
@@ -34,6 +44,12 @@ def __chrome_ctrlserver_start():
             while True:
                 recv_msg = await websocket.recv()
                 __rs_pipline(recv_msg)
+                # 获取下待下发命令
+                try:
+                    jcmd=__cmd_queue.get_nowait()
+                    await cmd_send(jcmd)
+                except:
+                    pass
 
         async with serve(echo, '0.0.0.0', 8502):
             await asyncio.Future()
@@ -48,12 +64,7 @@ def __chrome_ctrlserver_start():
                 continue
             log.info(f"cmd_sender wait cmd...")
             jcmd = await __cmd_queue.get()
-            log.info(f"cmd_sender got cmd: {jcmd}")
-            try:
-                await __conn.send(jcmd)
-                log.info(f"cmd_sender send ok: {jcmd}")
-            except Exception as e:
-                log.error(e,exc_info=True)
+            await cmd_send(jcmd)
 
     loop = asyncio.new_event_loop()
     async def run():

@@ -1,7 +1,10 @@
+import asyncio
 import logging
 import re,os
 import threading
 import queue
+import time
+
 import utils.chrome_ext_cc as chromeExt
 from datetime import datetime
 import tools
@@ -17,22 +20,27 @@ def rs_mapper():
         tabId=asso.get('tabId')
         url=asso.get('url')
         url_tab[url]=tabId
+        log.info(f'set-asso: tabId={tabId} url={url}')
+
     def save_res(res):
         tabId=res.get('tabId')
         reslist=res['list']
         url=reslist[0].get('webUrl')
         url_tab[url]=tabId
+        log.info(f'set-asso: tabId={tabId} url={url} res-list-len={len(reslist)}')
         res_dict[tabId]=reslist
         res_queue.put(res)
 
     def hasTask(url,tabId):
+        had=False
         if (url and url_tab.get(url)):
-            return True
-        if tabId:
+            had=True
+        if tabId and not had:
             for tid in url_tab.values():
                 if tid==tabId:
-                    return True
-        return False
+                    had= True
+        log.info(f'check-browers-task: tabId={tabId} url={url} had={had}')
+        return had
 
     def getRes(url,tabId):
         info=None
@@ -40,20 +48,33 @@ def rs_mapper():
             tabId=url_tab.pop(url,None)
         if tabId:
             info=res_dict.pop(tabId,None)
+        log.info(f'try-get-res: tabId={tabId} url={url} got={info is not None}')
         return info
 
     def waitRes(url,tabId):
-        info=getRes(url,tabId)
-        if not info:
-            while True:
-                try:
-                    res_queue.get(timeout=30)
-                    info = getRes(url,tabId)
-                    if info:
-                        break
-                except queue.Empty:
-                    break
+        for i in range(60):
+            log.warning(f'wait-res: tabId={tabId} url={url} N={i}')
+            info = getRes(url, tabId)
+            if info:
+                break
+            time.sleep(1)
         return info
+
+        # info=getRes(url,tabId)
+        # if not info:
+        #     n=0
+        #     while True:
+        #         log.warning(f'wait-res: tabId={tabId} url={url} N={n}')
+        #         try:
+        #             res_queue.get(timeout=60)
+        #             info = getRes(url,tabId)
+        #             if info:
+        #                 break
+        #             n=n+1
+        #         except queue.Empty:
+        #             log.warning(f'wait-res-timeout: tabId={tabId} url={url} N={n}')
+        #             break
+        # return info
 
 
     def ls():
@@ -90,12 +111,18 @@ def rs_pipline(recv_msg):
 chromeExt.add_handler(rs_pipline)
 
 class General(ThiefBase):
+    def __init__(self,sharedObj,target_url:str=None):
+        super().__init__(sharedObj,target_url)
+        self.tabId=None
+        if isinstance(self.sharedObj,dict):
+            self.tabId=self.sharedObj.get('tabId')
+
     def target_id(self):
         return tools.md5_str(self.target_url)
 
     def fetch(self) -> (VideoInfo | PictureInfo, bytes | list[bytes]):
         url = self.target_url
-        tabId=self.sharedObj.get('tabId')
+        tabId=self.tabId
         # 先看看队列里有没有
         r0=RS_MAPPER['getRes'](url,tabId)
         # 如果没有则检查是否在加载中
@@ -106,7 +133,7 @@ class General(ThiefBase):
         r0=RS_MAPPER['waitRes'](url,tabId)
 
         if not r0 or len(r0)==0:
-            return None
+            return None,None
         res_info=None
         # 判断当前资源是视频为主，还是图片为主
         video_cnt,pic_cnt=0,0

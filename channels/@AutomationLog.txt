@@ -201,4 +201,17 @@ ControlType: ButtonControl}
 2023-12-31 04:32:45.687 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
 2023-12-31 04:32:47.616 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {ClassName: 'SelectContactWnd', ControlType: WindowControl}
 2023-12-31 04:32:47.648 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '搜索', ControlType: EditControl}
-2023-12-31 04:32:51.165 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-31 05:59:21.822 wechat3.py[595] open_reswxapp -> 
+2023-12-31 04:32:51.165 pydevd_repr_utils.py[213] get_value_repr -> 2023-12-31 05:59:21.822 wechat3.py[595] open_reswxapp -> 2023-12-31 06:39:21.806 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:39:29.139 <string>[1] <module> -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:39:31.853 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:39:39.191 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:39:49.225 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:39:59.255 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:40:09.298 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:40:19.333 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:40:29.359 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:40:39.396 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:40:49.423 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:40:59.448 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:41:09.478 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
+2023-12-31 06:41:19.513 pydevd_resolver.py[178] _getPyDictionary -> 

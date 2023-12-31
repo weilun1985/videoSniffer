@@ -173,18 +173,20 @@ class ThiefBase(metaclass=abc.ABCMeta):
         # self.load_res_files(info)
         info=self.__get_cache()
         self.log.info(
-            f'start-thief-task: id={self.target_id()} cached={True if info else False} thief={self.name} target={self.target_url}')
+            f'thief-getFromCache: id={self.target_id()} cached={info.name if info else False} thief={self.name} target={self.target_url}')
         if info:
-            return info
+            return info,True
+        self.log.info(
+            f'thief-fetchFromSource: id={self.target_id()} thief={self.name} target={self.target_url}')
         info, data = self.fetch()
         if info is not None:
             if hasattr(info,'name') and info.name is not None:
                 info.name = info.name.strip()
             if hasattr(info,'content') and info.content is not None:
                 info.content = info.content.strip()
-        info.id = self.target_id()
-        info.thief = self.name
-        self.__set_cache(info)
-        return info
+            info.id = self.target_id()
+            info.thief = self.name
+            self.__set_cache(info)
+        return info,False
 
 

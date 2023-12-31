@@ -16,7 +16,7 @@
         <view class="progress-box">
             <progress percent="{{savePercent}}" show-info stroke-width="3"/>
         </view>
-        <view class="tip">如果无法保存，请点击“复制链接”，粘贴到手机浏览器进行下载。小程序只能下载不超过50MB的内容，如果超过了请“复制链接”到浏览器下载。</view>
+        <view class="tip">如果无法保存，请点击“复制链接”，粘贴到手机浏览器进行下载。小程序下载文件尽量不超过50MB。</view>
     </block>
     <block wx:elif="{{image}}">     
         <view class="swiper-container">

@@ -17,15 +17,17 @@ log=tools.get_logger()
 
 def thief_go(thief,from_msg):
     try:
-        info:ResInfo= thief.go()
+        info,from_cache= thief.go()
         if info is None:
-            send_reply(from_msg,'不好意思啊，小的无能，没能找到您要的资源。我已经记录下来了，尽快学会寻找这类资源。')
+            send_reply(from_msg,'不好意思啊，暂时没能找到您要的资源。您可以重试一下。')
             log.warning(f'未能获取到指定资源：{thief.name} {thief.target_url}')
             return
         if isinstance(info,VideoInfo):
             send_reply(from_msg,'为您找到1个视频:', None)
+            log.info(f'找到1个视频: {info.id} {info.name} FromCache:{from_cache} Thief={thief.name} Url={thief.target_url}')
         elif isinstance(info,PictureInfo):
             send_reply(from_msg,f'为您找到{len(info.res_url_list)}张图片:', None)
+            log.info(f'找到{len(info.res_url_list)}张图片: {info.id} {info.name} FromCache:{from_cache} Thief={thief.name} Url={thief.target_url}')
         else:
             send_reply(from_msg, '已为您找到对应资源:', None)
         # send_reply(from_msg, info.id, None)
@@ -35,7 +37,7 @@ def thief_go(thief,from_msg):
         # send_reply(from_msg,content,None)
     except Exception as e:
         log.error(e, exc_info=True)
-        reply = f'哎呀呀，不好意思我出问题了，需要休息一下，请您稍后再试。'
+        reply = f'哎呀呀，不好意思我出问题了，请您稍后再试。'
         send_reply(from_msg, reply)
 
 # def cache_res_info(info):
@@ -55,16 +57,19 @@ def do_task(task):
         pass
 
     if sharedObj:
-        thief = get_thief(sharedObj)
-    if thief is not None:
-        send_reply(body,'任务已收到，正在处理中，稍后返回您结果。')
-        # 新起一个线程来跑
-        # thief_go(thief,body)
-        thr=threading.Thread(target=thief_go,args=(thief,body))
-        thr.start()
-    else:
-        default_reply = f'您的任务我已收到了，可是这个任务我暂时还不会哈，等我学会后再帮您解决。'
-        send_reply(body,default_reply)
+        needThief,thief = get_thief(sharedObj)
+        if needThief:
+            if thief is not None:
+                send_reply(body, '任务已收到，正在处理中，稍后返回您结果。')
+                # 新起一个线程来跑
+                # thief_go(thief,body)
+                thr = threading.Thread(target=thief_go, args=(thief, body))
+                thr.start()
+            else:
+                default_reply = f'您的任务我已收到了，可是这个任务我暂时还不会哈，等我学会后再帮您解决。'
+                send_reply(body, default_reply)
+        else:
+            pass
 
 
 

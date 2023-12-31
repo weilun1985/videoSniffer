@@ -233,14 +233,22 @@ Page({
         var title=app.title;
         var path='/pages/index/index';
         var descp=app.descp;
-        var imageUrl='https://1e63211h01.yicp.fun/static/logo.jpg';
-        if(this.data.id&&(this.data.video||this.data.image)){
-            title=this.data.title;
+        var imageUrl='https://1e63211h01.yicp.fun/static/logo2.png';
+        if(this.data.id){
+            if(this.data.title&&this.data.title.length>0){
+                title=this.data.title;
+            }
+            else if(this.data.descp&&this.data.descp.length>0){
+                title=this.data.descp;
+            }
             path='/pages/index/index?id='+this.data.id;
             descp=this.data.descp;
             if(this.data.res_type=='picture'){
                 imageUrl=this.data.image.urls[0];
+            }else{
+                imageUrl='https://1e63211h01.yicp.fun/static/fetchok.png'
             }
+            
         }
         return {
             title: title,

@@ -46,7 +46,13 @@ def run():
                     match=re.match(r'^res:(\w{32})$',send_info.Content)
                     if match:
                         resId=match.group(1)
-                        wechat3.send_reswxapp(send_info.To,resId)
+                        try:
+                            wechat3.send_reswxapp(send_info.To,resId)
+                        except Exception as e:
+                            log.error(e,exc_info=True)
+                            app_url='#小程序://照片去水印小助手/SJIkxBS6WcjazXE'
+                            wechat3.send_msg(send_info.To, resId)
+                            wechat3.send_msg(send_info.To,f'请复制上面的提取码，点击下面的链接打开小程序后即可下载:{app_url}')
                     else:
                         wechat3.send_msg(send_info.To, send_info.Content)
                 if send_info.Files is not None:

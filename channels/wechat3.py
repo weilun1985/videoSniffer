@@ -1,5 +1,8 @@
 import json
 import typing
+
+import uiautomation
+
 import utils.chrome_ext_cc as chromeExt
 import tools
 import wintools
@@ -196,7 +199,7 @@ class WeChatUtil:
         msg_info=WeChatMessageInfo()
         msg_info.Sender=sender_btn.Name
         msg_info.MsgContent=msg_content
-
+        msg_info.RecvTime=time.time_ns()
 
         if btn_main is not None:
             WeChatUtil.parse_link_msg(btn_main,msg_info)
@@ -563,8 +566,9 @@ def reswxapp_reload():
     auto.SetClipboardText('')
     wxapp=open_reswxapp()
     x1,y1,x2,y2=reswxapp_menu_click(wxapp)
-
-    location = autogui.locateOnScreen(os.path.join(CURRENT_DIR,'reload.png'))
+    img_path_reload=os.path.join(CURRENT_DIR,'reload.png')
+    # log.info(f'img_path_reload: {img_path_reload} {os.path.exists(img_path_reload)}')
+    location = autogui.locateOnScreen(img_path_reload)
     autogui.click(location.left, location.top)
     time.sleep(1)
 
@@ -574,12 +578,14 @@ def reswxapp_share(session_name,resId):
     time.sleep(1)
     wxapp = open_reswxapp()
     x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
-    location = autogui.locateOnScreen(os.path.join(CURRENT_DIR,'share.png'))
+    img_path_share=os.path.join(CURRENT_DIR,'share.png')
+    # log.info(f'img_path_share: {img_path_share} {os.path.exists(img_path_share)}')
+    location = autogui.locateOnScreen(img_path_share)
     # autogui.click(x1, y1)
     autogui.click(location.left, location.top)
 
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
-    auto.WaitForExist(shchat, 10)
+    auto.WaitForExist(shchat, 5)
     search = shchat.EditControl(Name='搜索')
     search.Click(simulateMove=False)
     auto.SetClipboardText(session_name)
