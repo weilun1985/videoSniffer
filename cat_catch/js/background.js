@@ -611,7 +611,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(function (details){
 
 chrome.tabs.onCreated.addListener(function(newTab) {
     // console.log("New tab created with ID: " + tab.id,tab);
-    var info={tabId:newTab.id,url:newTab.pendingUrl};
+    var info={tabId:newTab.id,url:newTab.pendingUrl,t:Date.now()};
     ws_send('tab_created',info);
 });
 
@@ -833,6 +833,7 @@ function ws_send(tp,data){
         var msg=JSON.stringify(wrap);
         if(websocket&&websocket.readyState===WebSocket.OPEN){
             websocket.send(msg);
+            return true
         }
         else{
             ws_delaySendList.push(msg);
@@ -840,6 +841,7 @@ function ws_send(tp,data){
     }catch (err){
         console.warn(err);
     }
+    return false;
 }
 
 function report_to_server(tabId){
@@ -851,9 +853,10 @@ function report_to_server(tabId){
          });
          se=tabReqCnt[tabId];
          console.log(`report at ${Date.now()}: tabId=${tabId} tab-status=${tabStatus[tabId]} req_cnt=${se[1]}/${se[0]} res-count:${list.length} ${log}`);
-         var info={tabId:tabId,list:list};
-         ws_send('res',info);
+         var info={tabId:tabId,list:list,t:Date.now()};
+         return ws_send('res',info);
     }
+    return false;
 }
 var report_waits={};
 function reportToServer(tabId){
@@ -872,7 +875,9 @@ function reportToServer(tabId){
     console.log(`try report at ${Date.now()}: tabId=${tabId} tabstatus=${tab_status} res-count=${list.length} req_cnt=${req_cnt_e}/${req_cnt_s}`);
     if(list.length>0){
         if(tab_status==='complete'&&req_cnt_e>0&&req_cnt_e>=req_cnt_s){
-            report_to_server(tabId);
+            if(report_to_server(tabId)){
+                // chrome.tabs.remove(tabId);
+            }
         }else{
             let wait_cnt=wait_report?wait_report.cnt:0;
             report_waits[tabId]={waiting:true,cnt:++wait_cnt};
