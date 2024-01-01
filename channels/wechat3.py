@@ -552,14 +552,25 @@ def reswxapp_menu_click(wxapp):
     menuBtn = wxapp.ButtonControl(Name='菜单')
     auto.WaitForExist(menuBtn, timeout=2)
     boundR = menuBtn.BoundingRectangle
-    l0, t0, r0, b0 = boundR.left, boundR.top, boundR.right, boundR.bottom
+    l0, t0, r0, b0 ,w0 ,h0= boundR.left, boundR.top, boundR.right, boundR.bottom,boundR.width(),boundR.height()
     # 分享按钮的坐标
-    l1, t1, r1, b1 = l0 - 242, t0 + 166, r0 - 237, b0 + 216
-    x1, y1 = l1 + 10, t1 + 10
+    x1 = l0 + int(-4.1 * w0) + 10
+    y1 = t0 + int(3.0 * h0) + 10
     # 重载按钮的坐标
-    l2, t2, r2, b2 = l0 - 166, t0 + 307, r0 - 160, b0 + 358
-    x2, y2 = l2 + 10, t2 + 10
+    # l2, t2, r2, b2 = l0 - 166, t0 + 307, r0 - 160, b0 + 358
+    # x2, y2 = l2 + 10, t2 + 10
+    x2 = l0 + int(-2.8 * w0) + 10
+    y2 = t0 + int(5.6 * h0) + 10
     menuBtn.Click(simulateMove=False)
+
+    # img_path_share = os.path.join(CURRENT_DIR, 'share.png')
+    # location_1 = autogui.locateOnScreen(img_path_share)
+    # img_path_reload = os.path.join(CURRENT_DIR, 'reload.png')
+    # location_2 = autogui.locateOnScreen(img_path_reload)
+    #
+    # print(f'({x1},{y1}) ({location_1.left},{location_1.top})')
+    # print(f'({x2},{y2}) ({location_2.left},{location_2.top})')
+
     return x1,y1,x2,y2
 
 def reswxapp_reload():
@@ -567,10 +578,8 @@ def reswxapp_reload():
     auto.SetClipboardText('')
     wxapp=open_reswxapp()
     x1,y1,x2,y2=reswxapp_menu_click(wxapp)
-    img_path_reload=os.path.join(CURRENT_DIR,'reload.png')
-    # log.info(f'img_path_reload: {img_path_reload} {os.path.exists(img_path_reload)}')
-    location = autogui.locateOnScreen(img_path_reload)
-    autogui.click(location.left, location.top)
+    wxapp.SetActive()
+    autogui.click(x2, y2)
     time.sleep(1)
 
 def reswxapp_share(session_name,resId):
@@ -579,16 +588,14 @@ def reswxapp_share(session_name,resId):
     time.sleep(1)
     wxapp = open_reswxapp()
     x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
-    img_path_share=os.path.join(CURRENT_DIR,'share.png')
-    # log.info(f'img_path_share: {img_path_share} {os.path.exists(img_path_share)}')
-    location = autogui.locateOnScreen(img_path_share)
-    # autogui.click(x1, y1)
-    autogui.click(location.left, location.top)
+    wxapp.SetActive()
+    autogui.click(x1, y1)
 
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
     auto.WaitForExist(shchat, 3)
+    shchat.SetActive()
     search = shchat.EditControl(Name='搜索')
-    search.Click(simulateMove=False)
+    search.Click(simulateMove=False,waitTime=0.1)
     auto.SetClipboardText(session_name)
     search.SendKeys('{Ctrl}a')
     search.SendKeys('{Ctrl}v', waitTime=0.1)
@@ -637,7 +644,11 @@ def test_7():
     sess_name='文件传输助手'
     send_reswxapp(sess_name,resId)
 
+def test_8():
+    wxapp=open_reswxapp()
+    reswxapp_menu_click(wxapp)
+
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    test_7()
+    test_8()
     pass
