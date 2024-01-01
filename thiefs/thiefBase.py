@@ -3,10 +3,9 @@ import abc,os
 import json
 import re
 import sys,logging
+import time
 import typing
-
 import requests
-
 import message_center
 import thiefs
 import tools
@@ -34,16 +33,19 @@ class ThiefBase(metaclass=abc.ABCMeta):
                 url = match.group(0)
         return url,host,shared_text
 
-    def __init__(self,sharedObj,target_url:str=None):
+    def __init__(self,sharedObj,target_url:str=None,trigger_time:int=None):
         self.sharedObj=sharedObj
         self.target_url = target_url
         if not self.target_url:
             url,host,stxt=self.analyzing(sharedObj)
             if url:
                 self.target_url=url
+        self.create_time=time.time_ns()
+        self.trigger_time=trigger_time
         self.download_dir=os.path.join(download_root_dir,self.name)
         self.download_picture_dir=os.path.join(self.download_dir,'pictures')
         self.download_video_dir = os.path.join(self.download_dir,'videos')
+        self.log.info(f'init thief: name={self.name} target_id={self.target_id()} target_url={self.target_url}')
 
 
     @property

@@ -756,16 +756,15 @@ function reportToServer0(info){
 var websocket;
 const ws_delaySendList=[];
 const myCmds={
-    open_new_tab:function (opt){
+    open_new_tab:function (cmdId,opt){
         let url=opt.url;
         let code=opt.code;
         chrome.tabs.create({url:url},(newTab)=>{
-            // console.log('New tab:', newTab);
-            // var info={tabId:newTab.id,code:code,url:url};
-            // ws_send('asso',info);
+            var info={tabId:newTab.id,url:url,pendingUrl:newTab.pendingUrl,t:Date.now(),code:code};
+            ws_send('tab_created',info,cmdId);
         });
     },
-    close_tab:function (opt){
+    close_tab:function (cmdId,opt){
         let tabId=opt.tabId;
         chrome.tabs.remove(tabId);
     }
@@ -802,8 +801,9 @@ function getws(){
             let cmdObj = JSON.parse(event.data);
             if(cmdObj&&cmdObj.command){
                 let cmd = cmdObj.command;
+                let cmdId=cmdObj.cmdId;
                 let opt = cmdObj.opt;
-                myCmds[cmd](opt);
+                myCmds[cmd](cmdId,opt);
             }else {
                 console.warn('未定义的操作指令：',event.data);
             }
@@ -826,10 +826,13 @@ function getws(){
     return websocket;
 }
 
-function ws_send(tp,data){
+function ws_send(tp,data,cmdId){
     try {
         var ts = Date.now();
         var wrap={tp:tp,data:data,ts:ts};
+        if(cmdId){
+            wrap.cmdId= cmdId;
+        }
         var msg=JSON.stringify(wrap);
         if(websocket&&websocket.readyState===WebSocket.OPEN){
             websocket.send(msg);
@@ -876,7 +879,7 @@ function reportToServer(tabId){
     if(list.length>0){
         if(tab_status==='complete'&&req_cnt_e>0&&req_cnt_e>=req_cnt_s){
             if(report_to_server(tabId)){
-                // chrome.tabs.remove(tabId);
+                chrome.tabs.remove(tabId);
             }
         }else{
             let wait_cnt=wait_report?wait_report.cnt:0;

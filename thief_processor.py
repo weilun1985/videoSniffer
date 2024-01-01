@@ -51,13 +51,15 @@ def do_task(task):
     thief = None
     body=task.MessageBody
     sharedObj=None
+    timec=None
     if isinstance(body,WeChatMessageInfo):
         sharedObj=body.MsgContent
+        trigger_time=body.RecvTime
     elif isinstance(body,MailInfo):
         pass
 
     if sharedObj:
-        needThief,thief = get_thief(sharedObj)
+        needThief,thief = get_thief(sharedObj,trigger_time)
         if needThief:
             if thief is not None:
                 send_reply(body, '任务已收到，正在处理中，稍后返回您结果。')

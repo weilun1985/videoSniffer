@@ -19,11 +19,10 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 WECHAT_MAX_FILE_SIZE=50*1024*1024
 
 wx_click_rqueue=queue.Queue()
-def wx_click_callback(recv_msg):
-    robj = tools.json_to_obj(recv_msg)
+def wx_click_callback(robj):
     tp=robj.get('tp')
     if tp=='tab_created':
-        log.info(f'wx_click_callback:{recv_msg}')
+        log.info(f'wx_click_callback:{robj}')
         data = robj.get('data')
         wx_click_rqueue.put(data)
 
@@ -133,6 +132,8 @@ class WeChatUtil:
         if msg_info.MsgContent is not None:
             summary = '\r\n'.join(msg_info.MsgContent)
         msg_content={'summary':summary}
+        msg_info.MsgContent = msg_content
+
         linkbtn.Click(simulateMove=False)
         try:
             tab=wx_click_rqueue.get(timeout=5)
@@ -141,7 +142,7 @@ class WeChatUtil:
             msg_content['url'] = url
             msg_content['tabId'] = tabId
             msg_info.MsgFullGet = True
-            msg_info.MsgContent = msg_content
+
         except queue.Empty:
             pass
 
@@ -200,8 +201,8 @@ class WeChatUtil:
         msg_info.Sender=sender_btn.Name
         msg_info.MsgContent=msg_content
         msg_info.RecvTime=time.time_ns()
-
-        if btn_main is not None:
+        specialTypes= ['[图片]', '[视频]', '[音乐]', '[链接]']
+        if btn_main is not None and name in specialTypes:
             WeChatUtil.parse_link_msg(btn_main,msg_info)
         match=re.match('^\[([\u4e00-\u9fa5]{2,5})\]$',name)
         if match is not None:
@@ -585,7 +586,7 @@ def reswxapp_share(session_name,resId):
     autogui.click(location.left, location.top)
 
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
-    auto.WaitForExist(shchat, 5)
+    auto.WaitForExist(shchat, 3)
     search = shchat.EditControl(Name='搜索')
     search.Click(simulateMove=False)
     auto.SetClipboardText(session_name)

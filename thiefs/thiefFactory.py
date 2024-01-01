@@ -37,13 +37,13 @@ def get_classes_in_package():
 
     return classes
 
-def get_thief(shareObj):
+def get_thief(shareObj,trigger_time):
     url,host,shared_text=ThiefBase.analyzing(shareObj)
     if not url:
         return False,None
-    thief: ThiefBase = General(shareObj,url)
+    thief: ThiefBase = General(shareObj,url,trigger_time)
     if host in ['xhslink.com', 'www.xiaohongshu.com']:
-        thief = Xhs(url)
+        thief = Xhs(shareObj,url,trigger_time)
     # elif host == 'v.douyin.com':
     #     pass
     # elif host == 'mbd.baidu.com':

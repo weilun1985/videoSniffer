@@ -49,6 +49,7 @@ class MailInfo:
         self.text_content=None
         self.html_content=None
         self.files=[]
+        self.RecvTime: int = None
 
 class MailSendInfo:
     def __init__(self):
