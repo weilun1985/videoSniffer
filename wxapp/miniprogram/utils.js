@@ -318,8 +318,45 @@ function downloadSaveFile0(type, url, successc, failc) {
     })
 }
 
+function checkAuth(gotc){
+    wx.getSetting({
+        success(res){
+            if (res.authSetting['scope.writePhotosAlbum']) {
+                // 已经获得授权
+                gotc && gotc();
+            }else if (res.authSetting['scope.writePhotosAlbum'] === undefined) {
+                // 第一次运行，授权未定义，可以直接保存，系统会一次性询问用户权限
+                gotc && gotc();
+            }else{
+                // 用户拒绝授权后，打开设置页可以看到授权提示开关
+                wx.openSetting({
+                    success(res){
+                        if (res.authSetting['scope.writePhotosAlbum']) {  // 用户授权
+                            gotc && gotc();
+                        }else{ // 用户拒绝授权
+                            wx.showToast({
+                                title: '权限不足',
+                            })
+                        }
+                    },
+                    fail(res){
+                        wx.showToast({
+                            title: '相册权限设置失败',
+                        })
+                    }
+                })
+            }
+        },
+        fail(res){
+            wx.showToast({
+                title: '相册权限设置失败,获取设置',
+            })
+        }
+    });
+}
+
 //检查权限
-function checkAuth(gotc) {
+function checkAuth0(gotc) {
     //查询权限
     wx.showLoading({
         title: '检查授权情况',

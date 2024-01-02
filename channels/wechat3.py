@@ -222,6 +222,7 @@ class WeChatUtil:
 def __get_wx_win():
     wechat = auto.WindowControl(searchDepth=1, Name='微信', ClassName='WeChatMainWndForPC')
     if wechat.Exists():
+        wechat.SetActive()
         return wechat
 
 def __search_session(wechat:WindowControl, key):
@@ -573,45 +574,70 @@ def reswxapp_menu_click(wxapp):
 
     return x1,y1,x2,y2
 
-def reswxapp_reload():
+def reswxapp_click_reload(wxapp=None):
     # 清空剪切板，并重载小程序
     auto.SetClipboardText('')
-    wxapp=open_reswxapp()
+    if not wxapp:
+        wxapp=open_reswxapp()
     x1,y1,x2,y2=reswxapp_menu_click(wxapp)
     wxapp.SetActive()
     autogui.click(x2, y2)
-    time.sleep(1)
 
-def reswxapp_share(session_name,resId):
-    # 将资源ID写入剪切板，待小程序自动读取
-    auto.SetClipboardText(resId)
-    time.sleep(1)
-    wxapp = open_reswxapp()
+
+def reswxapp_click_share(wxapp=None):
+    if not wxapp:
+        wxapp = open_reswxapp()
     x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
     wxapp.SetActive()
     autogui.click(x1, y1)
 
+def open_reswxapp():
+    wxapp = auto.PaneControl(searchDepth=1, Name='照片去水印小助手', ClassName='Chrome_WidgetWin_0')
+    if not wxapp.Exists(maxSearchSeconds=2):
+        log.warning('there are no weixing miniapp windows!')
+        # 打开微信小程序
+        wxwin=__get_wx_win()
+        btn=wxwin.ButtonControl(Name='小程序面板')
+        btn.Click(simulateMove=False)
+        mini_apps=auto.PaneControl(searchDepth=1,ClassName='Chrome_WidgetWin_0')
+        auto.WaitForExist(mini_apps,timeout=2)
+        mini_doc=mini_apps.DocumentControl(Name='小程序',ClassName='Chrome_RenderWidgetHostHWND')
+        auto.WaitForExist(mini_doc,timeout=2)
+        mini_apps_close=mini_apps.GetLastChildControl().ButtonControl(Name='关闭',searchDepth=4)
+        wxapp_btn=mini_doc.GroupControl(Name='照片去水印小助手')
+        if wxapp_btn.Exists(maxSearchSeconds=3):
+            mini_apps.SetActive()
+            wxapp_btn.Click(simulateMove=False)
+        if mini_apps_close.Exists(maxSearchSeconds=1):
+            mini_apps.SetActive()
+            mini_apps_close.Click(simulateMove=False)
+    auto.WaitForExist(wxapp,timeout=3)
+    wxapp.SetActive()
+
+
+
+    return wxapp
+
+def send_reswxapp(session_name,resId):
+    def reset():
+        reswxapp_click_reload()
+        # 将资源ID写入剪切板，待小程序自动读取
+        auto.SetClipboardText(resId)
+        time.sleep(0.1)
+        reswxapp_click_share()
+    reset()
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
+
     auto.WaitForExist(shchat, 3)
     shchat.SetActive()
     search = shchat.EditControl(Name='搜索')
-    search.Click(simulateMove=False,waitTime=0.1)
+    search.Click(simulateMove=False, waitTime=0.1)
     auto.SetClipboardText(session_name)
     search.SendKeys('{Ctrl}a')
     search.SendKeys('{Ctrl}v', waitTime=0.1)
     search.SendKeys('{Enter}', waitTime=0.1)
     sendbtn = shchat.ButtonControl(Name='发送')
     sendbtn.Click(simulateMove=False)
-
-def open_reswxapp():
-    wxapp = auto.PaneControl(searchDepth=1, Name='照片去水印小助手', ClassName='Chrome_WidgetWin_0')
-    auto.WaitForExist(wxapp, timeout=2)
-    wxapp.SetActive()
-    return wxapp
-
-def send_reswxapp(session_name,resId):
-    reswxapp_reload()
-    reswxapp_share(session_name,resId)
 
     pass
 
@@ -648,7 +674,8 @@ def test_8():
     wxapp=open_reswxapp()
     reswxapp_menu_click(wxapp)
 
+
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    test_8()
+    test_7()
     pass

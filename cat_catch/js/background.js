@@ -877,12 +877,12 @@ function reportToServer(tabId){
     let req_cnt_e=tabReqCnt[tabId][1];
     console.log(`try report at ${Date.now()}: tabId=${tabId} tabstatus=${tab_status} res-count=${list.length} req_cnt=${req_cnt_e}/${req_cnt_s}`);
     if(list.length>0){
-        if(tab_status==='complete'&&req_cnt_e>0&&req_cnt_e>=req_cnt_s){
+        let wait_cnt=wait_report?wait_report.cnt:0;
+        if((tab_status==='complete'&&req_cnt_e>0&&req_cnt_e>=req_cnt_s)||wait_cnt>=5){
             if(report_to_server(tabId)){
                 chrome.tabs.remove(tabId);
             }
         }else{
-            let wait_cnt=wait_report?wait_report.cnt:0;
             report_waits[tabId]={waiting:true,cnt:++wait_cnt};
             console.log(`report will delay run， tabId=${tabId} count=${wait_cnt} REASON:tabstatus=${tab_status} req_cnt=${req_cnt_e}/${req_cnt_s} time=${Date.now()}`);
             setTimeout(()=>{

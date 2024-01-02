@@ -83,19 +83,24 @@ Page({
     autoFillResId(){
         wx.getClipboardData({
             success: res => {
-              var resId=res.data;
-              if(resIdRex.test(resId)){
-                this.setData({
-                    id:resId
-                })
-                wx.setClipboardData({
-                    data: '',
-                })
-                var url= `/pages/index/index?id=${resId}`;
-                console.log(url)
-                wx.redirectTo({
-                    url: url,
-                })
+                wx.hideToast();
+                var resId=res.data;
+                if(resIdRex.test(resId)){
+                    this.setData({
+                        id:resId
+                    })
+                    wx.setClipboardData({
+                        data: '视频&图片提取专家',
+                        success:function(res){},
+                        fail(errMsg){
+                            console.error(errMsg);
+                        }
+                    })
+                    var url= `/pages/index/index?id=${resId}`;
+                    console.log(url)
+                    wx.redirectTo({
+                        url: url,
+                    })
               }
               else{
                   console.log('no resId in clipboard, retry next.');
@@ -103,7 +108,8 @@ Page({
               }
             },
             fail: err => {
-              console.log('获取剪贴板内容失败：', err);
+                wx.hideToast();
+                console.log('获取剪贴板内容失败：', err);
             },
           });
     },

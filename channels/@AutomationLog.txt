@@ -214,4 +214,28 @@ ControlType: ButtonControl}
 2023-12-31 06:40:49.423 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
 2023-12-31 06:40:59.448 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
 2023-12-31 06:41:09.478 pydevd_resolver.py[178] _getPyDictionary -> Find Control Timeout(10s): {Name: '重新进入', ControlType: TextControl}
-2023-12-31 06:41:19.513 pydevd_resolver.py[178] _getPyDictionary -> 
+2023-12-31 06:41:19.513 pydevd_resolver.py[178] _getPyDictionary -> 2024-01-02 20:54:16.535 wechat3.py[615] open_reswxapp -> 2024-01-02 20:59:07.353 wechat3.py[616] open_reswxapp -> 2024-01-02 21:01:05.497 wechat3.py[617] open_reswxapp -> 2024-01-02 21:31:07.682 wechat3.py[617] open_reswxapp -> 2024-01-02 21:33:20.631 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:33:23.944 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:33:27.217 pydevd_repr_utils.py[171] repr_instance -> 2024-01-02 21:34:08.341 wechat3.py[616] open_reswxapp -> 2024-01-02 21:44:40.848 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:44:52.879 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:45:10.113 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:45:22.127 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:46:02.312 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 21:46:14.368 pydevd_repr_utils.py[213] get_value_repr -> 2024-01-02 22:00:36.374 wechat3.py[623] open_reswxapp -> 2024-01-02 22:02:23.297 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:34.096 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:34.579 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:39.490 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:39.613 wechat3.py[624] open_reswxapp -> Can not move cursor. ButtonControl's BoundingRectangle is (0,0,0,0)[0x0]. SearchProperties: {Name: '关闭', ControlType: ButtonControl}
+2024-01-02 22:02:40.547 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:41.982 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:44.253 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:49.512 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:49.696 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:50.887 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:51.441 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:02:53.680 pydevd_repr_utils.py[213] get_value_repr -> 2024-01-02 22:03:42.939 wechat3.py[626] open_reswxapp -> 2024-01-02 22:06:21.077 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:06:26.953 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:06:32.735 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:06:38.733 pydevd_repr_utils.py[213] get_value_repr -> 2024-01-02 22:10:30.773 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:10:33.472 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
+2024-01-02 22:10:38.780 pydevd_repr_utils.py[171] repr_instance -> 
