@@ -15,6 +15,7 @@ from models import VideoInfo, PictureInfo, ResInfo
 app_root_dir=os.path.dirname(sys.argv[0])
 download_root_dir=os.path.join(app_root_dir,'download')
 # print('download-root-dir:',download_root_dir)
+URL_PATTERN="(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*(\?[^\s\?\u4e00-\u9fa5\uFF00-\uFF5F\<\>\#\{\}|\^~\[ \]#]*)?(#[\w-]*)?"
 class ThiefBase(metaclass=abc.ABCMeta):
 
     @staticmethod
@@ -27,7 +28,7 @@ class ThiefBase(metaclass=abc.ABCMeta):
         elif isinstance(shareObj, typing.List):
             shared_text = ' '.join(shareObj)
         if shared_text:
-            match = re.search('(http|https)://([\w\.]+)/[\w/?=&]+', shared_text)
+            match = re.search(URL_PATTERN, shared_text)
             if match is not None:
                 host = match.group(2)
                 url = match.group(0)

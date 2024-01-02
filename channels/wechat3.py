@@ -12,7 +12,7 @@ import logging,math,os,queue,re,time
 from uiautomation import WindowControl,ListControl,ButtonControl,TextControl,EditControl,ListItemControl,DocumentControl,PropertyId
 from datetime import datetime,timedelta
 from typing import List,Any
-from models import WeChatMessageInfo,WeChatSessionInfo,FileTooLargeException
+from models import WeChatMessageInfo,WeChatSessionInfo,FileTooLargeException,WeChatSendInfo
 
 log=tools.get_logger()
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -641,7 +641,25 @@ def send_reswxapp(session_name,resId):
 
     pass
 
-
+def send(send_info:WeChatSendInfo):
+    if send_info.Content is not None:
+        match = re.match(r'^res:(\w{32})$', send_info.Content)
+        if match:
+            resId = match.group(1)
+            try:
+                send_reswxapp(send_info.To, resId)
+            except Exception as e:
+                log.error(e, exc_info=True)
+                app_url = '#小程序://照片去水印小助手/ZzNbrUhZyxxCyut'
+                send_msg(send_info.To, resId)
+                send_msg(send_info.To, f'请复制上面的提取码，点击下面的链接打开小程序后即可下载:{app_url}')
+        else:
+            send_msg(send_info.To, send_info.Content)
+    if send_info.Files is not None:
+        for file in send_info.Files:
+            log.info(f'send-file-to "{send_info.To}": {file}')
+            send_file(send_info.To, file)
+    pass
 
 def test_5():
     mq = queue.Queue()

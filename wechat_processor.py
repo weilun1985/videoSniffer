@@ -24,8 +24,6 @@ def run():
         try:
             me = wechat3.me_is_who()
             # 检测新消息
-            # log.info('start check new msg...')
-            # a,b= wechat3.check_new_msg(msg_handler)
             slist,a,b=wechat3.list_newMsg_session(msg_handler)
             if a>0:
                 log.info(f'check new msg compleate, receive={a}, got={b}')
@@ -42,23 +40,7 @@ def run():
                 if send_info is None:
                     break
                 c=c+1
-                if send_info.Content is not None:
-                    match=re.match(r'^res:(\w{32})$',send_info.Content)
-                    if match:
-                        resId=match.group(1)
-                        try:
-                            wechat3.send_reswxapp(send_info.To,resId)
-                        except Exception as e:
-                            log.error(e,exc_info=True)
-                            app_url='#小程序://照片去水印小助手/ZzNbrUhZyxxCyut'
-                            wechat3.send_msg(send_info.To, resId)
-                            wechat3.send_msg(send_info.To,f'请复制上面的提取码，点击下面的链接打开小程序后即可下载:{app_url}')
-                    else:
-                        wechat3.send_msg(send_info.To, send_info.Content)
-                if send_info.Files is not None:
-                    for file in send_info.Files:
-                        log.info(f'send-file-to "{send_info.To}": {file}')
-                        wechat3.send_file(send_info.To, file)
+                wechat3.send(send_info)
                 d=d+1
             except Exception as e:
                 log.error(e, exc_info=True)

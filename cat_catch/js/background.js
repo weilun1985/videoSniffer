@@ -600,7 +600,17 @@ chrome.webNavigation.onCompleted.addListener(function (details) {
         console.log(`webNavigation.onCompleted: req_cnt=${se[1]}/${se[0]}`)
         tabStatus[details.tabId] ='complete';
     }
-
+    if(details.url.startsWith('https://m.weibo.cn/')){
+        console.log('is wei bo');
+        chrome.scripting.executeScript({
+              target: {tabId: details.tabId},
+              func: function (){
+                  var playBtn=document.querySelector('.mwbv-play-button');
+                  playBtn&&playBtn.click();
+              },
+        },
+        () => {});
+    }
 });
 
 chrome.webNavigation.onBeforeNavigate.addListener(function (details){
