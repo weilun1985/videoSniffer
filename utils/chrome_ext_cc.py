@@ -7,6 +7,7 @@ import threading
 from websockets import serve
 from asyncio import Queue as AQueue
 from queue import Queue as NQueue
+from utils.wx_dw_hosts import is_host_in_wxdw
 
 
 __conn = None
@@ -32,9 +33,12 @@ def rs_mapper():
         url=reslist[0].get('webUrl')
         t=res.get('t')
         url_tab[url]=tabId
-        log.info(f'save-res: tabId={tabId} time={t} url={url} res-list-len={len(reslist)}')
+        log.info(f'save-res: tabId={tabId} time={t} res-list-len={len(reslist)} url={url} ')
         res_dict[tabId]=reslist
         res_queue.put(res)
+        for item in reslist:
+            iurl=item.get('url')
+            is_host_in_wxdw(iurl)
 
     def hasTask(url,tabId):
         had=False
@@ -44,7 +48,7 @@ def rs_mapper():
             for tid in url_tab.values():
                 if tid==tabId:
                     had= True
-        log.info(f'check-browers-task: tabId={tabId} url={url} had={had}')
+        log.info(f'check-browers-task: tabId={tabId} had={had} url={url}')
         return had
 
     def getRes(url,tabId):
@@ -53,12 +57,12 @@ def rs_mapper():
             tabId=url_tab.pop(url,None)
         if tabId:
             info=res_dict.pop(tabId,None)
-        log.info(f'try-get-res: tabId={tabId} url={url} got={info is not None}')
+        log.info(f'try-get-res: tabId={tabId} got={info is not None} url={url}')
         return info
 
     def waitRes(url,tabId):
         for i in range(60):
-            log.info(f'wait-res: tabId={tabId} url={url} N={i}')
+            log.info(f'wait-res: tabId={tabId} N={i} url={url}')
             info = getRes(url, tabId)
             if info:
                 break
@@ -88,7 +92,8 @@ def __rs_pipline(recv_msg):
     robj = tools.json_to_obj(recv_msg)
     tp=robj.get('tp')
     cmdId=robj.get('cmdId')
-    log.info(f'recv: tp={tp} cmdId={cmdId} content={recv_msg}')
+    if tp!='keep-alive':
+        log.info(f'recv: tp={tp} cmdId={cmdId} content={recv_msg}')
     data = robj.get('data')
     if tp=='tab_created':
         RS_MAPPER['save_asso'](data)
@@ -105,7 +110,7 @@ def __rs_pipline(recv_msg):
 
     for handler in __recv_handlers:
         try:
-            handler and handler(robj)
+            handler and handler(robj,cmdId)
         except Exception as e:
             log.error(e,exc_info=True)
 
@@ -124,7 +129,7 @@ def remove_handler(handler):
 
 def __chrome_ctrlserver_start():
     async def cmd_send(jcmd):
-        log.info(f"cmd_sender got cmd: {jcmd}")
+        # log.info(f"cmd_sender got cmd: {jcmd}")
         try:
             await __conn.send(jcmd)
             log.info(f"cmd_sender send ok: {jcmd}")
@@ -200,7 +205,7 @@ def open_new_tab(url,callback=None,code=None):
             tabId = data.get('tabId')
             url = data.get('url')
             t = data.get('t')
-            log.info(f'open_new_tab-callback: tabId={tabId} url={url} time={t} cmdId={cmdId}')
+            log.info(f'open_new_tab-callback: tabId={tabId} cmdId={cmdId} time={t} url={url}')
             callback(tabId,url,t)
         __cmdSender(cmdObj,fn)
     else:
@@ -224,3 +229,23 @@ def wait_res(url, tabId):
 
 def ls():
     RS_MAPPER['ls']()
+
+def open_and_wait_res(url,tabId=None):
+    r0 = get_res(url, tabId)
+    # 如果没有则检查是否在加载中
+    if not r0:
+        task = has_task(url, tabId)
+        if not task:
+            tabId_rqueue = queue.Queue()
+            def callback(tid, url, t):
+                tabId_rqueue.put(tid)
+
+            open_new_tab(url, callback)
+            log.info(f'wait for open tab return: url={url}')
+            try:
+                tabId = tabId_rqueue.get(timeout=30)
+            except Exception as e:
+                log.warning(e, exc_info=True)
+
+    r0 = wait_res(url, tabId)
+    return r0

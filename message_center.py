@@ -29,7 +29,7 @@ def pushThiefTask(info:MailInfo|WeChatMessageInfo):
     task_json=tools.obj_to_json(task)
     redis = tools.get_redis()
     status = redis.lpush(queue_name,task_json)
-    log.info(f'queue={queue_name} status={status} From={task.ChannelType} - {task.ChannelID} - {task.From} -{task.Time}')
+    # log.info(f'queue={queue_name} status={status} From={task.ChannelType} - {task.ChannelID} - {task.From} -{task.Time}')
     return status>0
 
 def popThiefTask()->ThiefTaskInfo:
@@ -59,8 +59,8 @@ def pushSendTask(info:WeChatSendInfo|MailSendInfo):
     task_json=tools.obj_to_json(info)
     redis = tools.get_redis()
     status = redis.lpush(queue_name,task_json)
-    log.info(
-        f'queue={queue_name} status={status} To={channel_type} - {info.Me} - {info.To} -{tools.simpleTimeStr(datetime.now())}')
+    # log.info(
+    #     f'queue={queue_name} status={status} To={channel_type} - {info.Me} - {info.To} -{tools.simpleTimeStr(datetime.now())}')
     return status > 0
 
 def popSendTask(channelType,channelID)->WeChatSendInfo:

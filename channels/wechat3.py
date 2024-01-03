@@ -19,12 +19,21 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 WECHAT_MAX_FILE_SIZE=50*1024*1024
 
 wx_click_rqueue=queue.Queue()
-def wx_click_callback(robj):
+def wx_click_callback(robj,cmdId):
     tp=robj.get('tp')
-    if tp=='tab_created':
-        log.info(f'wx_click_callback:{robj}')
-        data = robj.get('data')
-        wx_click_rqueue.put(data)
+    # log.info(f'wx_click_callback tp={tp} cmdId={cmdId}')
+    if tp=='tab_created' and not cmdId:
+        tabc = robj.get('data')
+        tabId = tabc.get("tabId")
+        url = tabc.get("url")
+        tc = int(tabc.get('t'))
+        now=time.time_ns()//1000000
+        tsp=now-tc
+        if tsp<2000:
+            log.info(f'Tab_Created_Callbak TabID={tabId} create-time={tc} now={now} timespan={tsp}ms url={url}')
+            wx_click_rqueue.put(tabc)
+        else:
+            log.warning('Ignore Tab_Create by too long timespan: TabID={tabId} create-time={tc} now={now} timespan={tsp}ms url={url}')
 
 chromeExt.add_handler(wx_click_callback)
 
@@ -135,16 +144,30 @@ class WeChatUtil:
         msg_info.MsgContent = msg_content
 
         linkbtn.Click(simulateMove=False)
+        log.info(f'Try-Get Link info:{msg_info.Sender} {msg_info.OrgContent} now={time.time_ns()//1000000}')
         try:
-            tab=wx_click_rqueue.get(timeout=5)
+            tab=None
+            for i in range(10):
+                itab=wx_click_rqueue.get(timeout=2)
+                tc = int(itab.get('t'))
+                now = time.time_ns() // 1000000
+                tsp = now - tc
+                if tsp<=2000:
+                    tab=itab
+                    break
+            if not tab:
+                return
+
             tabId=tab.get("tabId")
             url=tab.get("url")
+
             msg_content['url'] = url
             msg_content['tabId'] = tabId
             msg_info.MsgFullGet = True
 
+            log.info(f'Link-GOT {msg_info.Sender} {tabId} {url} {msg_info.OrgContent} now={now} tab-create-time={tc} tsp={tsp}ms')
         except queue.Empty:
-            pass
+            return
 
         # remark = f'sender={msg_info.Sender}'
         # got, obj= WeChatUtil.fetch_page_info(remark)
@@ -198,6 +221,7 @@ class WeChatUtil:
             msg_content.append(name)
 
         msg_info=WeChatMessageInfo()
+        msg_info.OrgContent=name
         msg_info.Sender=sender_btn.Name
         msg_info.MsgContent=msg_content
         msg_info.RecvTime=time.time_ns()
@@ -213,7 +237,7 @@ class WeChatUtil:
             msg_info.MsgFullGet = True
         name1=name.replace('\n',' ')
         log.info(
-            f'fetch-msg: sender={msg_info.Sender} topic={name1} full-get={msg_info.MsgFullGet} btn-main-found:{btn_main != None} {btn_main.BoundingRectangle if btn_main != None else None} content:{msg_content}')
+            f'fetch-msg: sender={msg_info.Sender} org-content={name1} full-get={msg_info.MsgFullGet} btn-main-found:{btn_main != None} {btn_main.BoundingRectangle if btn_main != None else None} content:{msg_info.MsgContent}')
         return msg_info
 
 
@@ -579,17 +603,23 @@ def reswxapp_click_reload(wxapp=None):
     auto.SetClipboardText('')
     if not wxapp:
         wxapp=open_reswxapp()
-    x1,y1,x2,y2=reswxapp_menu_click(wxapp)
-    wxapp.SetActive()
-    autogui.click(x2, y2)
+    if wxapp:
+        x1,y1,x2,y2=reswxapp_menu_click(wxapp)
+        wxapp.SetActive()
+        autogui.click(x2, y2)
+        return True
+    return False
 
 
 def reswxapp_click_share(wxapp=None):
     if not wxapp:
         wxapp = open_reswxapp()
-    x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
-    wxapp.SetActive()
-    autogui.click(x1, y1)
+    if wxapp:
+        x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
+        wxapp.SetActive()
+        autogui.click(x1, y1)
+        return True
+    return False
 
 def open_reswxapp():
     wxapp = auto.PaneControl(searchDepth=1, Name='照片去水印小助手', ClassName='Chrome_WidgetWin_0')
@@ -606,28 +636,33 @@ def open_reswxapp():
         mini_apps_close=mini_apps.GetLastChildControl().ButtonControl(Name='关闭',searchDepth=4)
         wxapp_btn=mini_doc.GroupControl(Name='照片去水印小助手')
         if wxapp_btn.Exists(maxSearchSeconds=3):
+            print(wxapp_btn.BoundingRectangle)
             mini_apps.SetActive()
-            wxapp_btn.Click(simulateMove=False)
+            wxapp_btn.Click(simulateMove=False,waitTime=2)
+            # autogui.click(wxapp_btn.BoundingRectangle.left, wxapp_btn.BoundingRectangle.top)
+            log.info('click open mini app Icon!')
+        else:
+            log.warning('unfound wx miniApp button!')
+            return None
         if mini_apps_close.Exists(maxSearchSeconds=1):
             mini_apps.SetActive()
             mini_apps_close.Click(simulateMove=False)
-    auto.WaitForExist(wxapp,timeout=3)
+    if not auto.WaitForExist(wxapp,timeout=3):
+        return None
     wxapp.SetActive()
-
-
-
     return wxapp
 
 def send_reswxapp(session_name,resId):
     def reset():
-        reswxapp_click_reload()
-        # 将资源ID写入剪切板，待小程序自动读取
-        auto.SetClipboardText(resId)
-        time.sleep(0.1)
-        reswxapp_click_share()
-    reset()
+        if reswxapp_click_reload():
+            # 将资源ID写入剪切板，待小程序自动读取
+            auto.SetClipboardText(resId)
+            time.sleep(0.1)
+            return reswxapp_click_share()
+        return False
+    if not reset():
+        return False
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
-
     auto.WaitForExist(shchat, 3)
     shchat.SetActive()
     search = shchat.EditControl(Name='搜索')
@@ -638,21 +673,24 @@ def send_reswxapp(session_name,resId):
     search.SendKeys('{Enter}', waitTime=0.1)
     sendbtn = shchat.ButtonControl(Name='发送')
     sendbtn.Click(simulateMove=False)
-
-    pass
+    log.info(f'wx-send-mini_app: session={session_name}  resId={resId}')
+    return True
 
 def send(send_info:WeChatSendInfo):
     if send_info.Content is not None:
         match = re.match(r'^res:(\w{32})$', send_info.Content)
         if match:
             resId = match.group(1)
-            try:
-                send_reswxapp(send_info.To, resId)
-            except Exception as e:
-                log.error(e, exc_info=True)
+            def send_by_text():
                 app_url = '#小程序://照片去水印小助手/ZzNbrUhZyxxCyut'
                 send_msg(send_info.To, resId)
                 send_msg(send_info.To, f'请复制上面的提取码，点击下面的链接打开小程序后即可下载:{app_url}')
+            try:
+                if not send_reswxapp(send_info.To, resId):
+                    send_by_text()
+            except Exception as e:
+                log.error(e, exc_info=True)
+                send_by_text()
         else:
             send_msg(send_info.To, send_info.Content)
     if send_info.Files is not None:

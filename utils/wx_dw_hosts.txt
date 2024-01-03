@@ -11,7 +11,14 @@ vd4.bdstatic.com
 highlight-video.cdn.bcebos.com
 v26-web.douyinvod.com
 p-pc-weboff.byteimg.com
-
+f.video.weibocdn.com
+v2.kwaicdn.com
+v1.kwaicdn.com
+f7.baidu.com
+pic.rmb.bdstatic.com
+vd3.bdstatic.com
+vd2.bdstatic.com
+v3-web.douyinvod.com
 
 
 

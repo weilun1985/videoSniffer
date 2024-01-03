@@ -88,7 +88,7 @@ def run():
             if task.MessageBody is None:
                 log.error(f'message body is None:{task.__dict__}')
                 continue
-            log.info(f'receive: {type(task.MessageBody).__name__} channel={task.ChannelType}/{task.ChannelID}/{task.From} ->{task.Receiver} time={task.Time} ')
+            log.info(f'receive: {type(task.MessageBody).__name__} channel={task.ChannelType}/{task.ChannelID}/{task.From}->{task.Receiver} time={task.Time} content={task.MessageBody.__dict__}')
             do_task(task)
         except Exception as e:
             log.error(e,exc_info=True)

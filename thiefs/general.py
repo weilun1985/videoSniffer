@@ -125,21 +125,7 @@ class General(ThiefBase):
     def fetch(self) -> (VideoInfo | PictureInfo, bytes | list[bytes]):
         url = self.target_url
         tabId=self.tabId
-        # 先看看队列里有没有
-        r0=chromeExt.get_res(url,tabId)
-        # 如果没有则检查是否在加载中
-        if not r0:
-            task=chromeExt.has_task(url,tabId)
-            if not task:
-                tabId_rqueue=queue.Queue()
-                def callback(tid,url,t):
-                    tabId_rqueue.put(tid)
-                chromeExt.open_new_tab(url,callback)
-                self.log.info(f'wait for open tab return: url={url}')
-                tabId=tabId_rqueue.get(timeout=30)
-
-        r0=chromeExt.wait_res(url,tabId)
-
+        r0=chromeExt.open_and_wait_res(url,tabId)
         if not r0 or len(r0)==0:
             return None,None
         res_info=None

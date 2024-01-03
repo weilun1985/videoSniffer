@@ -33,6 +33,7 @@ chrome.alarms.onAlarm.addListener(function (alarm) {
 
 const tabStatus={};
 const tabReqCnt={};
+const tabCreateReport={}
 function set_reqcnt_s(tabId){
     if(tabReqCnt[tabId]){
         let req_cnt_s=tabReqCnt[tabId][0];
@@ -622,7 +623,14 @@ chrome.webNavigation.onBeforeNavigate.addListener(function (details){
 chrome.tabs.onCreated.addListener(function(newTab) {
     // console.log("New tab created with ID: " + tab.id,tab);
     var info={tabId:newTab.id,url:newTab.pendingUrl,t:Date.now()};
-    ws_send('tab_created',info);
+    var cmdId=undefined;
+    var report=tabCreateReport[newTab.id];
+    if(report) {
+        info = report.data;
+        cmdId = report.cmdId;
+    }
+    ws_send('tab_created',info,cmdId);
+    console.log(`tab-create-report: tabId=${info.tabId} time=${info.t} cmdId=${cmdId} url=${info.url}`);
 });
 
 //检查扩展名以及大小限制
@@ -771,7 +779,8 @@ const myCmds={
         let code=opt.code;
         chrome.tabs.create({url:url},(newTab)=>{
             var info={tabId:newTab.id,url:url,pendingUrl:newTab.pendingUrl,t:Date.now(),code:code};
-            ws_send('tab_created',info,cmdId);
+            tabCreateReport[newTab.id]={data:info,cmdId:cmdId};
+            // ws_send('tab_created',info,cmdId);
         });
     },
     close_tab:function (cmdId,opt){
@@ -789,7 +798,7 @@ function getws(){
             websocket.onclose = onclose;
             // console.log('WebSocket inited.');
         }catch (err){
-            console.warn(err);
+            // console.warn(err);
             websocket=undefined;
         }
     }
@@ -823,7 +832,7 @@ function getws(){
 
     }
     function onerror(error) {
-        console.error('WebSocket Error:', error);
+        // console.error('WebSocket Error:', error);
     }
     function onclose(event){
         console.log('WebSocket connection closed.',event);
@@ -837,26 +846,35 @@ function getws(){
 }
 
 function ws_send(tp,data,cmdId){
+    var ts = Date.now();
+    var wrap={tp:tp,data:data,ts:ts};
+    if(cmdId){
+        wrap.cmdId= cmdId;
+    }
+    var msg=JSON.stringify(wrap);
     try {
-        var ts = Date.now();
-        var wrap={tp:tp,data:data,ts:ts};
-        if(cmdId){
-            wrap.cmdId= cmdId;
-        }
-        var msg=JSON.stringify(wrap);
         if(websocket&&websocket.readyState===WebSocket.OPEN){
             websocket.send(msg);
             return true
         }
         else{
-            ws_delaySendList.push(msg);
+            if(tp !=='keep-alive') {
+                ws_delaySendList.push(msg);
+            }
         }
     }catch (err){
-        console.warn(err);
+        if(tp !=='keep-alive') {
+            ws_delaySendList.push(msg);
+            console.warn(err);
+        }
     }
     return false;
 }
-
+function ws_keep(){
+    console.log('weksocket keep.');
+    ws_send('keep-alive',Date.now());
+}
+setInterval(ws_keep,1000);
 function report_to_server(tabId){
     var list=cacheData[tabId];
     if(list.length>0){
@@ -865,7 +883,7 @@ function report_to_server(tabId){
              log+='\r\n'+item.name;
          });
          se=tabReqCnt[tabId];
-         console.log(`report at ${Date.now()}: tabId=${tabId} tab-status=${tabStatus[tabId]} req_cnt=${se[1]}/${se[0]} res-count:${list.length} ${log}`);
+         console.log(`res-got: report at ${Date.now()}: tabId=${tabId} tab-status=${tabStatus[tabId]} req_cnt=${se[1]}/${se[0]} res-count:${list.length} ${log}`);
          var info={tabId:tabId,list:list,t:Date.now()};
          return ws_send('res',info);
     }
