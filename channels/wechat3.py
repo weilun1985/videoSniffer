@@ -588,6 +588,7 @@ def reswxapp_menu_click(wxapp):
     # x2, y2 = l2 + 10, t2 + 10
     x2 = l0 + int(-2.8 * w0) + 10
     y2 = t0 + int(5.6 * h0) + 10
+    wxapp.SetActive()
     menuBtn.Click(simulateMove=False)
 
     # img_path_share = os.path.join(CURRENT_DIR, 'share.png')
@@ -607,7 +608,7 @@ def reswxapp_click_reload(wxapp=None):
         wxapp=open_reswxapp()
     if wxapp:
         x1,y1,x2,y2=reswxapp_menu_click(wxapp)
-        wxapp.SetActive(waitTime=0.1)
+        wxapp.SetActive()
         autogui.click(x2, y2)
         return True
     return False
@@ -618,7 +619,7 @@ def reswxapp_click_share(wxapp=None):
         wxapp = open_reswxapp()
     if wxapp:
         x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
-        wxapp.SetActive(waitTime=0.1)
+        wxapp.SetActive()
         autogui.click(x1, y1)
         return True
     return False
@@ -638,7 +639,6 @@ def open_reswxapp():
         mini_apps_close=mini_apps.GetLastChildControl().ButtonControl(Name='关闭',searchDepth=4)
         wxapp_btn=mini_doc.GroupControl(Name='照片去水印小助手')
         if wxapp_btn.Exists(maxSearchSeconds=3):
-            print(wxapp_btn.BoundingRectangle)
             mini_apps.SetActive(waitTime=0.1)
             wxapp_btn.Click(simulateMove=False,waitTime=2)
             # autogui.click(wxapp_btn.BoundingRectangle.left, wxapp_btn.BoundingRectangle.top)
@@ -665,8 +665,11 @@ def send_reswxapp(session_name,resId):
     if not reset():
         return False
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
-    auto.WaitForExist(shchat, 1)
-    shchat.SetActive(waitTime=0.1)
+    auto.WaitForExist(shchat, timeout=5)
+    if not shchat.Exists():
+        log.warning(f'un open wx mini-app share window: {session_name},send wx-mini-app fail:{resId} ')
+        return False
+    shchat.SetActive()
     search = (shchat.GetLastChildControl()
               .GetFirstChildControl()
               .GetFirstChildControl()
@@ -675,17 +678,18 @@ def send_reswxapp(session_name,resId):
     search.Click(simulateMove=False, waitTime=0.1)
     auto.SetClipboardText(session_name)
     search.SendKeys('{Ctrl}a')
-    search.SendKeys('{Ctrl}v', waitTime=0.1)
+    search.SendKeys('{Ctrl}v')
     contact_list=shchat.ListControl(Name='请勾选需要添加的联系人')
-    if not contact_list.Exists(maxSearchSeconds=0.5):
+    if not contact_list.Exists(maxSearchSeconds=2):
         cancelbtn=(shchat.GetLastChildControl()
                    .GetLastChildControl()
                    .GetLastChildControl()
                    .ButtonControl(Name='取消'))
         cancelbtn.Click(simulateMove=False)
+        log.warning(f'un found wechat session: {session_name},send wx-mini-app fail:{resId} ')
         return False
 
-    search.SendKeys('{Enter}', waitTime=0.1)
+    search.SendKeys('{Enter}')
     sendbtn = (shchat.GetLastChildControl()
                    .GetLastChildControl()
                    .GetLastChildControl()
