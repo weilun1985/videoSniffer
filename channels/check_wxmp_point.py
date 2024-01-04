@@ -10,7 +10,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 def open_reswxapp():
     wxapp = auto.PaneControl(searchDepth=1, Name='照片去水印小助手', ClassName='Chrome_WidgetWin_0')
     auto.WaitForExist(wxapp, timeout=2)
-    wxapp.SetActive()
+    wxapp.SetActive(waitTime=0.1)
     return wxapp
 
 def reswxapp_menu_click(wxapp):

@@ -246,7 +246,7 @@ class WeChatUtil:
 def __get_wx_win():
     wechat = auto.WindowControl(searchDepth=1, Name='微信', ClassName='WeChatMainWndForPC')
     if wechat.Exists():
-        wechat.SetActive()
+        wechat.SetActive(waitTime=0.1)
         return wechat
 
 def __search_session(wechat:WindowControl, key):
@@ -261,25 +261,26 @@ def __search_session(wechat:WindowControl, key):
         return False
     r1=resltListCtl.TextControl(Name='联系人',Depth=2)
     r2=resltListCtl.TextControl(Name='群聊',Depth=2)
-    if r1 is None and r2 is None:
+    if not r1.Exists(maxSearchSeconds=0.5) and not r2.Exists(maxSearchSeconds=0.5):
+        log.warning(f'un found wechat session: {key}')
         return False
 
-
     search.SendKeys('{Enter}',waitTime=0.1)
-    log.info(f"wechat search: {key}")
+    log.info(f"wechat search ok: {key}")
     return True
 
 def search_session(key):
     wechat = __get_wx_win()
-    wechat.SetActive()
+    wechat.SetActive(waitTime=0.1)
     return __search_session(wechat, key)
 
 def send_msg(session_name,msg):
     wechat=__get_wx_win()
-    wechat.SetActive()
+    wechat.SetActive(waitTime=0.1)
     current_sess_name = current_chat(wechat)
     if current_sess_name!=session_name:
-        __search_session(wechat, session_name)
+        if not __search_session(wechat, session_name):
+            return False
     edit = wechat.EditControl(Name=session_name)
     if edit.Exists():
         auto.SetClipboardText(msg)
@@ -299,10 +300,11 @@ def send_file(session_name,file):
     if file_size>WECHAT_MAX_FILE_SIZE:
         raise FileTooLargeException
     wechat = __get_wx_win()
-    wechat.SetActive()
+    wechat.SetActive(waitTime=0.1)
     current_sess_name = current_chat(wechat)
     if current_sess_name != session_name:
-        __search_session(wechat, session_name)
+        if not __search_session(wechat, session_name):
+            return False
     edit = wechat.EditControl(Name=session_name)
     if edit.Exists():
         wintools.setClipboardFiles([file])
@@ -321,7 +323,7 @@ def __me_is_who(wechat:WindowControl)->str:
 
 def me_is_who():
     wechat = __get_wx_win()
-    wechat.SetActive()
+    wechat.SetActive(waitTime=0.1)
     return __me_is_who(wechat)
 
 def list_newMsg_session(newMsgHandler=None):
@@ -605,7 +607,7 @@ def reswxapp_click_reload(wxapp=None):
         wxapp=open_reswxapp()
     if wxapp:
         x1,y1,x2,y2=reswxapp_menu_click(wxapp)
-        wxapp.SetActive()
+        wxapp.SetActive(waitTime=0.1)
         autogui.click(x2, y2)
         return True
     return False
@@ -616,7 +618,7 @@ def reswxapp_click_share(wxapp=None):
         wxapp = open_reswxapp()
     if wxapp:
         x1, y1, x2, y2 = reswxapp_menu_click(wxapp)
-        wxapp.SetActive()
+        wxapp.SetActive(waitTime=0.1)
         autogui.click(x1, y1)
         return True
     return False
@@ -637,7 +639,7 @@ def open_reswxapp():
         wxapp_btn=mini_doc.GroupControl(Name='照片去水印小助手')
         if wxapp_btn.Exists(maxSearchSeconds=3):
             print(wxapp_btn.BoundingRectangle)
-            mini_apps.SetActive()
+            mini_apps.SetActive(waitTime=0.1)
             wxapp_btn.Click(simulateMove=False,waitTime=2)
             # autogui.click(wxapp_btn.BoundingRectangle.left, wxapp_btn.BoundingRectangle.top)
             log.info('click open mini app Icon!')
@@ -645,11 +647,11 @@ def open_reswxapp():
             log.warning('unfound wx miniApp button!')
             return None
         if mini_apps_close.Exists(maxSearchSeconds=1):
-            mini_apps.SetActive()
+            mini_apps.SetActive(waitTime=0.1)
             mini_apps_close.Click(simulateMove=False)
     if not auto.WaitForExist(wxapp,timeout=3):
         return None
-    wxapp.SetActive()
+    wxapp.SetActive(waitTime=0.1)
     return wxapp
 
 def send_reswxapp(session_name,resId):
@@ -663,15 +665,32 @@ def send_reswxapp(session_name,resId):
     if not reset():
         return False
     shchat = auto.WindowControl(searchDepth=1, ClassName='SelectContactWnd')
-    auto.WaitForExist(shchat, 3)
-    shchat.SetActive()
-    search = shchat.EditControl(Name='搜索')
+    auto.WaitForExist(shchat, 1)
+    shchat.SetActive(waitTime=0.1)
+    search = (shchat.GetLastChildControl()
+              .GetFirstChildControl()
+              .GetFirstChildControl()
+              .GetFirstChildControl()
+              .EditControl(Name='搜索'))
     search.Click(simulateMove=False, waitTime=0.1)
     auto.SetClipboardText(session_name)
     search.SendKeys('{Ctrl}a')
     search.SendKeys('{Ctrl}v', waitTime=0.1)
+    contact_list=shchat.ListControl(Name='请勾选需要添加的联系人')
+    if not contact_list.Exists(maxSearchSeconds=0.5):
+        cancelbtn=(shchat.GetLastChildControl()
+                   .GetLastChildControl()
+                   .GetLastChildControl()
+                   .ButtonControl(Name='取消'))
+        cancelbtn.Click(simulateMove=False)
+        return False
+
     search.SendKeys('{Enter}', waitTime=0.1)
-    sendbtn = shchat.ButtonControl(Name='发送')
+    sendbtn = (shchat.GetLastChildControl()
+                   .GetLastChildControl()
+                   .GetLastChildControl()
+                   .GetFirstChildControl()
+               .ButtonControl(Name='发送'))
     sendbtn.Click(simulateMove=False)
     log.info(f'wx-send-mini_app: session={session_name}  resId={resId}')
     return True
@@ -698,6 +717,21 @@ def send(send_info:WeChatSendInfo):
             log.info(f'send-file-to "{send_info.To}": {file}')
             send_file(send_info.To, file)
     pass
+
+def clear_except():
+    wechat=__get_wx_win()
+    modal=wechat.PaneControl(ClassName='WeUIDialog',searchDepth=1)
+    if modal.Exists(maxSearchSeconds=1):
+        print('in modal.')
+        wechat.SetActive(waitTime=0.1)
+        btn=modal.ButtonControl(Name='确定')
+        if btn.Exists(maxSearchSeconds=0.1):
+            btn.Click(simulateMove=False)
+
+
+
+
+
 
 def test_5():
     mq = queue.Queue()
@@ -733,5 +767,5 @@ def test_8():
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    test_7()
+    send_reswxapp('sbsb','haha')
     pass

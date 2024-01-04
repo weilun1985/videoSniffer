@@ -238,4 +238,8 @@ ControlType: ButtonControl}
 2024-01-02 22:06:32.735 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
 2024-01-02 22:06:38.733 pydevd_repr_utils.py[213] get_value_repr -> 2024-01-02 22:10:30.773 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
 2024-01-02 22:10:33.472 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '照片去水印小助手', ClassName: 'Chrome_WidgetWin_0', ControlType: PaneControl}
-2024-01-02 22:10:38.780 pydevd_repr_utils.py[171] repr_instance -> 
+2024-01-02 22:10:38.780 pydevd_repr_utils.py[171] repr_instance -> 2024-01-04 20:48:45.394 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '联系人', Depth: 2, ControlType: TextControl}
+2024-01-04 20:48:48.201 pydevd_repr_utils.py[171] repr_instance -> Find Control Timeout(10s): {Name: '联系人', Depth: 2, ControlType: TextControl}
+2024-01-04 20:48:55.454 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '联系人', Depth: 2, ControlType: TextControl}
+2024-01-04 20:48:58.210 pydevd_repr_utils.py[213] get_value_repr -> Find Control Timeout(10s): {Name: '联系人', Depth: 2, ControlType: TextControl}
+2024-01-04 20:49:08.297 pydevd_repr_utils.py[171] repr_instance -> 
