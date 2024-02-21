@@ -62,7 +62,7 @@ def do_task(task):
         needThief,thief = get_thief(sharedObj,trigger_time)
         if needThief:
             if thief is not None:
-                send_reply(body, '任务已收到，正在处理中，稍后返回您结果。')
+                # send_reply(body, '任务已收到，正在处理中，稍后返回您结果。')
                 # 新起一个线程来跑
                 # thief_go(thief,body)
                 thr = threading.Thread(target=thief_go, args=(thief, body))

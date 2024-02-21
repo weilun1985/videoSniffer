@@ -34,7 +34,7 @@ QUEUE_SEND_TEMPL='VideoSniffer:Send_Channel:{}'
 SET_RES_INFO='VideoSniffer:Res_Info:{}'
 
 
-HOST_REDIS='192.168.31.162'
+HOST_REDIS='192.168.1.27'
 PORT_REDIS=6378
 HOST_IP=get_host_ip()
 

@@ -7,7 +7,7 @@ from inspect import isclass
 from datetime import datetime
 from thiefs.thiefBase import ThiefBase
 from thiefs.general import General
-from thiefs.xhs_v2 import Xhs
+from thiefs.ttt import TTT
 
 def get_classes_in_package():
     package_name='thiefs'
@@ -41,9 +41,11 @@ def get_thief(shareObj,trigger_time):
     url,host,shared_text=ThiefBase.analyzing(shareObj)
     if not url:
         return False,None
-    thief: ThiefBase = General(shareObj,url,trigger_time)
-    if host in ['xhslink.com', 'www.xiaohongshu.com']:
-        thief = Xhs(shareObj,url,trigger_time)
+    thief=TTT(shareObj,url,trigger_time)
+
+    # thief= General(shareObj,url,trigger_time)
+    # if host in ['xhslink.com', 'www.xiaohongshu.com']:
+    #     thief = Xhs(shareObj,url,trigger_time)
     # elif host == 'v.douyin.com':
     #     pass
     # elif host == 'mbd.baidu.com':

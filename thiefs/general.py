@@ -114,7 +114,7 @@ from models import ResInfo,VideoInfo,PictureInfo
 
 class General(ThiefBase):
     def __init__(self,sharedObj,target_url:str=None,trigger_time:int=None):
-        super().__init__(sharedObj,target_url)
+        super().__init__(sharedObj,target_url,trigger_time)
         self.tabId=None
         if isinstance(self.sharedObj,dict):
             self.tabId=self.sharedObj.get('tabId')
