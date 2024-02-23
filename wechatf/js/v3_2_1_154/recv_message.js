@@ -14,7 +14,7 @@ let hook_info = {
 	offset_msg: 0x68,
 	offset_nickName: null,
 	offset_type: 0x30,
-	msg_type: { 1: "text", 3: "image" },
+	msg_type: {} //{ 1: "text", 3: "image" },
 }
 
 

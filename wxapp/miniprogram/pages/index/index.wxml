@@ -1,8 +1,8 @@
 <!--index.wxml-->
 <view class="container">
     <block wx:if="{{video}}">
-        <video id="myVideo" class="video" src="{{video.url}}" bindplay="onPlay"></video>
-        
+        <!-- <video id="myVideo" class="video" src="{{video.url}}" bindplay="onPlay"></video> -->
+        <video id="myVideo" class="video" src="{{video.url}}" autoplay="{{true}}"></video>
         <view style="width: 100%;">
             <view class="size_box_left">找到共计1个视频</view>
             <view wx:if="{{size}}" class="size_box">{{size}}</view>
