@@ -10,7 +10,7 @@ from models import WeChatMessageInfo, WeChatSendInfo, ChannelType
 from lxml import etree
 
 log=tools.get_logger()
-tmap = {'1':'[文本]','3':'[图片]', '43':'[视频]', '49':'[链接]'}
+tmap = {'1':'[文本]','3':'[图片]', '43':'[视频]', '49':'[链接]','34':'[语音]'}
 
 def parse_msg(omsg):
     wxid = omsg['wxid']
@@ -42,7 +42,7 @@ def parse_msg(omsg):
 def checkout_newmsg():
     omsg = wechatf.get_message(False)
     if omsg:
-        # print(omsg)
+        print(omsg)
         wxid = omsg['wxid']
         msg,authed,uinfo=user_center.check_user_auth(wxid)
         if msg:
@@ -96,6 +96,9 @@ def run():
 
 if __name__ == '__main__':
     print('start at:',datetime.today().date().strftime('%Y%m%d %H:%M:%S'))
-    run()
-
+    while True:
+        msg = checkout_newmsg()
+        # if msg:
+        #     print(msg.__dict__)
+        time.sleep(1)
     pass
