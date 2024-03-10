@@ -8,12 +8,262 @@ import os
 from datetime import datetime
 from multiprocessing.dummy import Pool
 
+import utils
+
 # 当前目录路径
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 logging.basicConfig(level=logging.INFO)  # 日志器
 msg_queue = Queue()  # 消息队列
 pool = Pool(5)  # 线程池
+
+def get_wx_app_xml(title,res_id,from_wx_id):
+    ts=int(time.time())
+    xml=f'''
+    <?xml version="1.0"?>
+<msg>
+	<appmsg appid="" sdkver="0">
+		<title>{title}</title>
+		<des />
+		<username />
+		<action>view</action>
+		<type>33</type>
+		<showtype>0</showtype>
+		<content />
+		<url>https://mp.weixin.qq.com/mp/waerrpage?appid=wx6986d528afafd77a&amp;type=upgrade&amp;upgradetype=3#wechat_redirect</url>
+		<lowurl />
+		<forwardflag>0</forwardflag>
+		<dataurl />
+		<lowdataurl />
+		<contentattr>0</contentattr>
+		<streamvideo>
+			<streamvideourl />
+			<streamvideototaltime>0</streamvideototaltime>
+			<streamvideotitle />
+			<streamvideowording />
+			<streamvideoweburl />
+			<streamvideothumburl />
+			<streamvideoaduxinfo />
+			<streamvideopublishid />
+		</streamvideo>
+		<canvasPageItem>
+			<canvasPageXml><![CDATA[]]></canvasPageXml>
+		</canvasPageItem>
+		<appattach>
+			<totallen>0</totallen>
+			<attachid />
+			<cdnattachurl />
+			<emoticonmd5></emoticonmd5>
+			<aeskey></aeskey>
+			<fileext />
+			<islargefilemsg>0</islargefilemsg>
+		</appattach>
+		<extinfo />
+		<androidsource>3</androidsource>
+		<sourceusername>gh_c8da7eae451a@app</sourceusername>
+		<sourcedisplayname>无水印视频下载助手</sourcedisplayname>
+		<commenturl />
+		<thumburl />
+		<mediatagname />
+		<messageaction><![CDATA[]]></messageaction>
+		<messageext><![CDATA[]]></messageext>
+		<emoticongift>
+			<packageflag>0</packageflag>
+			<packageid />
+		</emoticongift>
+		<emoticonshared>
+			<packageflag>0</packageflag>
+			<packageid />
+		</emoticonshared>
+		<designershared>
+			<designeruin>0</designeruin>
+			<designername>null</designername>
+			<designerrediretcturl><![CDATA[null]]></designerrediretcturl>
+		</designershared>
+		<emotionpageshared>
+			<tid>0</tid>
+			<title>null</title>
+			<desc>null</desc>
+			<iconUrl><![CDATA[null]]></iconUrl>
+			<secondUrl />
+			<pageType>0</pageType>
+			<setKey>null</setKey>
+		</emotionpageshared>
+		<webviewshared>
+			<shareUrlOriginal />
+			<shareUrlOpen />
+			<jsAppId />
+			<publisherId>wxapp_wx6986d528afafd77apages/index/index.html?id={res_id}</publisherId>
+			<publisherReqId />
+		</webviewshared>
+		<template_id />
+		<md5 />
+		<websearch />
+		<weappinfo>
+			<pagepath><![CDATA[pages/index/index.html?id={res_id}]]></pagepath>
+			<username>gh_c8da7eae451a@app</username>
+			<appid>wx6986d528afafd77a</appid>
+			<version>4</version>
+			<type>2</type>
+			<weappiconurl><![CDATA[http://wx.qlogo.cn/mmhead/Q3auHgzwzM6SSiabXEMrHFvcEjW0HOpkWUAkcAicPFZw5LCRY0P4GlmA/96]]></weappiconurl>
+          	<weapppagethumbrawurl><![CDATA[https://1e63211h01.yicp.fun/static/fetchok.png]]></weapppagethumbrawurl>
+			<shareId><![CDATA[1_wx6986d528afafd77a_{res_id}_{ts}_0]]></shareId>
+			<appservicetype>0</appservicetype>
+			<secflagforsinglepagemode>0</secflagforsinglepagemode>
+			<videopageinfo>
+				<thumbwidth>717</thumbwidth>
+				<thumbheight>574</thumbheight>
+				<fromopensdk>0</fromopensdk>
+			</videopageinfo>
+		</weappinfo>
+		<statextstr />
+		<musicShareItem>
+			<musicDuration>0</musicDuration>
+		</musicShareItem>
+		<finderLiveProductShare>
+			<finderLiveID><![CDATA[]]></finderLiveID>
+			<finderUsername><![CDATA[]]></finderUsername>
+			<finderObjectID><![CDATA[]]></finderObjectID>
+			<finderNonceID><![CDATA[]]></finderNonceID>
+			<liveStatus><![CDATA[]]></liveStatus>
+			<appId><![CDATA[]]></appId>
+			<pagePath><![CDATA[]]></pagePath>
+			<productId><![CDATA[]]></productId>
+			<coverUrl><![CDATA[]]></coverUrl>
+			<productTitle><![CDATA[]]></productTitle>
+			<marketPrice><![CDATA[0]]></marketPrice>
+			<sellingPrice><![CDATA[0]]></sellingPrice>
+			<platformHeadImg><![CDATA[]]></platformHeadImg>
+			<platformName><![CDATA[]]></platformName>
+			<shopWindowId><![CDATA[]]></shopWindowId>
+			<flashSalePrice><![CDATA[0]]></flashSalePrice>
+			<flashSaleEndTime><![CDATA[0]]></flashSaleEndTime>
+			<ecSource><![CDATA[]]></ecSource>
+			<sellingPriceWording><![CDATA[]]></sellingPriceWording>
+			<platformIconURL><![CDATA[]]></platformIconURL>
+			<firstProductTagURL><![CDATA[]]></firstProductTagURL>
+			<firstProductTagAspectRatioString><![CDATA[0.0]]></firstProductTagAspectRatioString>
+			<secondProductTagURL><![CDATA[]]></secondProductTagURL>
+			<secondProductTagAspectRatioString><![CDATA[0.0]]></secondProductTagAspectRatioString>
+			<firstGuaranteeWording><![CDATA[]]></firstGuaranteeWording>
+			<secondGuaranteeWording><![CDATA[]]></secondGuaranteeWording>
+			<thirdGuaranteeWording><![CDATA[]]></thirdGuaranteeWording>
+			<isPriceBeginShow>false</isPriceBeginShow>
+			<lastGMsgID><![CDATA[]]></lastGMsgID>
+			<promoterKey><![CDATA[]]></promoterKey>
+			<discountWording><![CDATA[]]></discountWording>
+			<priceSuffixDescription><![CDATA[]]></priceSuffixDescription>
+			<showBoxItemStringList />
+		</finderLiveProductShare>
+		<finderOrder>
+			<appID><![CDATA[]]></appID>
+			<orderID><![CDATA[]]></orderID>
+			<path><![CDATA[]]></path>
+			<priceWording><![CDATA[]]></priceWording>
+			<stateWording><![CDATA[]]></stateWording>
+			<productImageURL><![CDATA[]]></productImageURL>
+			<products><![CDATA[]]></products>
+			<productsCount><![CDATA[0]]></productsCount>
+		</finderOrder>
+		<finderShopWindowShare>
+			<finderUsername><![CDATA[]]></finderUsername>
+			<avatar><![CDATA[]]></avatar>
+			<nickname><![CDATA[]]></nickname>
+			<commodityInStockCount><![CDATA[]]></commodityInStockCount>
+			<appId><![CDATA[]]></appId>
+			<path><![CDATA[]]></path>
+			<appUsername><![CDATA[]]></appUsername>
+			<query><![CDATA[]]></query>
+			<liteAppId><![CDATA[]]></liteAppId>
+			<liteAppPath><![CDATA[]]></liteAppPath>
+			<liteAppQuery><![CDATA[]]></liteAppQuery>
+			<platformTagURL><![CDATA[]]></platformTagURL>
+			<saleWording><![CDATA[]]></saleWording>
+			<lastGMsgID><![CDATA[]]></lastGMsgID>
+			<profileTypeWording><![CDATA[]]></profileTypeWording>
+			<reputationInfo>
+				<hasReputationInfo>0</hasReputationInfo>
+				<reputationScore>0</reputationScore>
+				<reputationWording />
+				<reputationTextColor />
+				<reputationLevelWording />
+				<reputationBackgroundColor />
+			</reputationInfo>
+			<productImageURLList />
+		</finderShopWindowShare>
+		<findernamecard>
+			<username />
+			<avatar><![CDATA[]]></avatar>
+			<nickname />
+			<auth_job />
+			<auth_icon>0</auth_icon>
+			<auth_icon_url />
+			<ecSource><![CDATA[]]></ecSource>
+			<lastGMsgID><![CDATA[]]></lastGMsgID>
+		</findernamecard>
+		<finderGuarantee>
+			<scene><![CDATA[0]]></scene>
+		</finderGuarantee>
+		<directshare>0</directshare>
+		<gamecenter>
+			<namecard>
+				<iconUrl />
+				<name />
+				<desc />
+				<tail />
+				<jumpUrl />
+			</namecard>
+		</gamecenter>
+		<patMsg>
+			<chatUser />
+			<records>
+				<recordNum>0</recordNum>
+			</records>
+		</patMsg>
+		<secretmsg>
+			<issecretmsg>0</issecretmsg>
+		</secretmsg>
+		<referfromscene>0</referfromscene>
+		<gameshare>
+			<liteappext>
+				<liteappbizdata />
+				<priority>0</priority>
+			</liteappext>
+			<appbrandext>
+				<litegameinfo />
+				<priority>-1</priority>
+			</appbrandext>
+			<gameshareid />
+			<sharedata />
+			<isvideo>0</isvideo>
+			<duration>0</duration>
+			<isexposed>0</isexposed>
+			<readtext />
+		</gameshare>
+		<mpsharetrace>
+			<hasfinderelement>0</hasfinderelement>
+			<lastgmsgid />
+		</mpsharetrace>
+		<wxgamecard>
+			<framesetname />
+			<mbcarddata />
+			<minpkgversion />
+			<mbcardheight>0</mbcardheight>
+			<isoldversion>0</isoldversion>
+		</wxgamecard>
+	</appmsg>
+	<fromusername>{from_wx_id}</fromusername>
+	<scene>0</scene>
+	<appinfo>
+		<version>1</version>
+		<appname />
+	</appinfo>
+	<commenturl />
+</msg>
+    '''
+    return xml
+
+
 
 
 def forward(w, msg):
@@ -61,7 +311,8 @@ def forward(w, msg):
 
 def on_message(msg):
     """消息回调，建议异步处理，防止阻塞"""
-    print(msg)
+    # print(msg)
+    print(utils.wx_msg_tostring(msg))
     msg_queue.put(msg)
 
 
@@ -115,6 +366,15 @@ def main():
     # 其他：pull_type = 4
     lists = w.pull_list(pull_type=3)
     print(lists)
+
+    app_code= w.get_small_app_code(
+        app_id="wx6986d528afafd77a"
+    )
+    print('app_code:',app_code)
+
+    xml = get_wx_app_xml('好兄弟，一辈子', '23edf889fabb7772ccd96805626c5115',my_info.get('wx_id'))
+    w.send_xml(to_wx='lichzh1985',xml_str=xml)
+    print('发送小程序xml完成，请验证')
 
     # 获取朋友圈数据
     # moments = w.get_moments()

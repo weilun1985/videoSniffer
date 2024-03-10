@@ -1,4 +1,5 @@
 import re
+import time
 from queue import Queue
 import res_db
 from lxml import etree
@@ -19,7 +20,7 @@ headers = {
 URL_PATTERN="(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*(\?[^\s\?\u4e00-\u9fa5\uFF00-\uFF5F\<\>\#\{\}|\^~\[ \]#]*)?(#[\w-]*)?"
 forword_third=['25984985637719491@openim']
 forword_fetch_queue=Queue()
-app_url = '#小程序://照片去水印小助手/ZzNbrUhZyxxCyut'
+
 
 def on_msg(wxapi,myinfo,msg):
     msg_type = msg["msg_type"]
@@ -71,15 +72,7 @@ def on_msg(wxapi,myinfo,msg):
         # log.info(f'找到资源： 类型={type(res_info).__name__} 名称={res_info.name} 数量={1 if isinstance(res_info,VideoInfo) else len(res_info.res_url_list)} 用户={reply_to_msg.get("wx_id")} {reply_to_msg.get("sender")}\r\n分享链接={res_info.share_url}\r\n')
         log.info(
             f'找到资源：用户={reply_to_msg.get("wx_id")} {reply_to_msg.get("sender")}\r\n{utils.res_info_stringfy(res_info)}')
-        res_id=res_info.id
-        if isinstance(res_info,VideoInfo):
-            send_wx_text_reply(wxapi,reply_to_msg,'为您找到1个视频:')
-        elif isinstance(res_info,PictureInfo):
-            send_wx_text_reply(wxapi,reply_to_msg,f'为您找到{len(res_info.res_url_list)}张图片:')
-        else:
-            send_wx_text_reply(wxapi,reply_to_msg, '已为您找到对应资源:')
-        send_wx_text_reply(wxapi,reply_to_msg,res_id)
-        send_wx_text_reply(wxapi,reply_to_msg, f'请复制上面的提取码，点击下面的链接打开小程序后即可下载:{app_url}')
+        send_wx_resApp_reply(wxapi,reply_to_msg,res_info)
 
 def is_res_task(msg):
     msg_type = msg["msg_type"]
@@ -100,6 +93,40 @@ def send_wx_text_reply(wxapi,from_msg,message):
         wxapi.send_text_and_at_member(to_chat_room=reply_session, to_wx_list=[reply_to], msg=message)
     else:
         wxapi.send_text(to_wx=reply_to, msg=message)
+
+def send_wx_resLink_reply(wxapi,reply_to_msg,res_info):
+    app_url = '#小程序://照片去水印小助手/ZzNbrUhZyxxCyut'
+    res_id = res_info.id
+
+    if isinstance(res_info, VideoInfo):
+        title='为您找到1个视频:'
+        send_wx_text_reply(wxapi, reply_to_msg, title)
+    elif isinstance(res_info, PictureInfo):
+        title=f'为您找到{len(res_info.res_url_list)}张图片:'
+        send_wx_text_reply(wxapi, reply_to_msg, title)
+    else:
+        title='已为您找到对应资源:'
+        send_wx_text_reply(wxapi, reply_to_msg, title)
+    send_wx_text_reply(wxapi, reply_to_msg, res_id)
+    send_wx_text_reply(wxapi, reply_to_msg, f'请复制上面的提取码，点击下面的链接打开小程序后即可下载:{app_url}')
+    res_name = res_info.name if hasattr(res_info, 'name') else title
+    log.info(f'已回发资源小程序[链接]：资源ID={res_id} 资源名称={res_name} 接收人={reply_to_msg.get("sender")}')
+
+def send_wx_resApp_reply(wxapi,reply_to_msg,res_info):
+    reply_session = reply_to_msg.get('wx_id')
+    reply_to = reply_to_msg.get('sender')
+    from_wxid=reply_to_msg.get('self_wx_id')
+    if isinstance(res_info, VideoInfo):
+        title = '为您找到1个视频:'
+    elif isinstance(res_info, PictureInfo):
+        title = f'为您找到{len(res_info.res_url_list)}张图片:'
+    else:
+        title = '已为您找到对应资源:'
+    res_name=res_info.name if hasattr(res_info, 'name') else title
+    res_id=res_info.id
+    xml=get_wx_app_xml(res_name,res_id,from_wxid)
+    wxapi.send_xml(to_wx=reply_session,xml_str=xml)
+    log.info(f'已回发资源小程序[卡片]：资源ID={res_id} 资源名称={res_name} 接收人={reply_to_msg.get("sender")}')
 
 def forword_fetch(wxapi,msg):
     msg_type = msg["msg_type"]
@@ -281,3 +308,248 @@ def get_file_info(path):
         log.error(msg)
     return size,type
 
+def get_wx_app_xml(title,res_id,from_wx_id):
+    ts=int(time.time())
+    xml=f'''
+    <?xml version="1.0"?>
+<msg>
+	<appmsg appid="" sdkver="0">
+		<title>{title}</title>
+		<des />
+		<username />
+		<action>view</action>
+		<type>33</type>
+		<showtype>0</showtype>
+		<content />
+		<url>https://mp.weixin.qq.com/mp/waerrpage?appid=wx6986d528afafd77a&amp;type=upgrade&amp;upgradetype=3#wechat_redirect</url>
+		<lowurl />
+		<forwardflag>0</forwardflag>
+		<dataurl />
+		<lowdataurl />
+		<contentattr>0</contentattr>
+		<streamvideo>
+			<streamvideourl />
+			<streamvideototaltime>0</streamvideototaltime>
+			<streamvideotitle />
+			<streamvideowording />
+			<streamvideoweburl />
+			<streamvideothumburl />
+			<streamvideoaduxinfo />
+			<streamvideopublishid />
+		</streamvideo>
+		<canvasPageItem>
+			<canvasPageXml><![CDATA[]]></canvasPageXml>
+		</canvasPageItem>
+		<appattach>
+			<totallen>0</totallen>
+			<attachid />
+			<cdnattachurl />
+			<emoticonmd5></emoticonmd5>
+			<aeskey></aeskey>
+			<fileext />
+			<islargefilemsg>0</islargefilemsg>
+		</appattach>
+		<extinfo />
+		<androidsource>3</androidsource>
+		<sourceusername>gh_c8da7eae451a@app</sourceusername>
+		<sourcedisplayname>无水印视频下载助手</sourcedisplayname>
+		<commenturl />
+		<thumburl />
+		<mediatagname />
+		<messageaction><![CDATA[]]></messageaction>
+		<messageext><![CDATA[]]></messageext>
+		<emoticongift>
+			<packageflag>0</packageflag>
+			<packageid />
+		</emoticongift>
+		<emoticonshared>
+			<packageflag>0</packageflag>
+			<packageid />
+		</emoticonshared>
+		<designershared>
+			<designeruin>0</designeruin>
+			<designername>null</designername>
+			<designerrediretcturl><![CDATA[null]]></designerrediretcturl>
+		</designershared>
+		<emotionpageshared>
+			<tid>0</tid>
+			<title>null</title>
+			<desc>null</desc>
+			<iconUrl><![CDATA[null]]></iconUrl>
+			<secondUrl />
+			<pageType>0</pageType>
+			<setKey>null</setKey>
+		</emotionpageshared>
+		<webviewshared>
+			<shareUrlOriginal />
+			<shareUrlOpen />
+			<jsAppId />
+			<publisherId>wxapp_wx6986d528afafd77apages/index/index.html?id={res_id}</publisherId>
+			<publisherReqId />
+		</webviewshared>
+		<template_id />
+		<md5 />
+		<websearch />
+		<weappinfo>
+			<pagepath><![CDATA[pages/index/index.html?id={res_id}]]></pagepath>
+			<username>gh_c8da7eae451a@app</username>
+			<appid>wx6986d528afafd77a</appid>
+			<version>4</version>
+			<type>2</type>
+			<weappiconurl><![CDATA[http://wx.qlogo.cn/mmhead/Q3auHgzwzM6SSiabXEMrHFvcEjW0HOpkWUAkcAicPFZw5LCRY0P4GlmA/96]]></weappiconurl>
+          	<weapppagethumbrawurl><![CDATA[https://1e63211h01.yicp.fun/static/fetchok.png]]></weapppagethumbrawurl>
+			<shareId><![CDATA[1_wx6986d528afafd77a_{res_id}_{ts}_0]]></shareId>
+			<appservicetype>0</appservicetype>
+			<secflagforsinglepagemode>0</secflagforsinglepagemode>
+			<videopageinfo>
+				<thumbwidth>717</thumbwidth>
+				<thumbheight>574</thumbheight>
+				<fromopensdk>0</fromopensdk>
+			</videopageinfo>
+		</weappinfo>
+		<statextstr />
+		<musicShareItem>
+			<musicDuration>0</musicDuration>
+		</musicShareItem>
+		<finderLiveProductShare>
+			<finderLiveID><![CDATA[]]></finderLiveID>
+			<finderUsername><![CDATA[]]></finderUsername>
+			<finderObjectID><![CDATA[]]></finderObjectID>
+			<finderNonceID><![CDATA[]]></finderNonceID>
+			<liveStatus><![CDATA[]]></liveStatus>
+			<appId><![CDATA[]]></appId>
+			<pagePath><![CDATA[]]></pagePath>
+			<productId><![CDATA[]]></productId>
+			<coverUrl><![CDATA[]]></coverUrl>
+			<productTitle><![CDATA[]]></productTitle>
+			<marketPrice><![CDATA[0]]></marketPrice>
+			<sellingPrice><![CDATA[0]]></sellingPrice>
+			<platformHeadImg><![CDATA[]]></platformHeadImg>
+			<platformName><![CDATA[]]></platformName>
+			<shopWindowId><![CDATA[]]></shopWindowId>
+			<flashSalePrice><![CDATA[0]]></flashSalePrice>
+			<flashSaleEndTime><![CDATA[0]]></flashSaleEndTime>
+			<ecSource><![CDATA[]]></ecSource>
+			<sellingPriceWording><![CDATA[]]></sellingPriceWording>
+			<platformIconURL><![CDATA[]]></platformIconURL>
+			<firstProductTagURL><![CDATA[]]></firstProductTagURL>
+			<firstProductTagAspectRatioString><![CDATA[0.0]]></firstProductTagAspectRatioString>
+			<secondProductTagURL><![CDATA[]]></secondProductTagURL>
+			<secondProductTagAspectRatioString><![CDATA[0.0]]></secondProductTagAspectRatioString>
+			<firstGuaranteeWording><![CDATA[]]></firstGuaranteeWording>
+			<secondGuaranteeWording><![CDATA[]]></secondGuaranteeWording>
+			<thirdGuaranteeWording><![CDATA[]]></thirdGuaranteeWording>
+			<isPriceBeginShow>false</isPriceBeginShow>
+			<lastGMsgID><![CDATA[]]></lastGMsgID>
+			<promoterKey><![CDATA[]]></promoterKey>
+			<discountWording><![CDATA[]]></discountWording>
+			<priceSuffixDescription><![CDATA[]]></priceSuffixDescription>
+			<showBoxItemStringList />
+		</finderLiveProductShare>
+		<finderOrder>
+			<appID><![CDATA[]]></appID>
+			<orderID><![CDATA[]]></orderID>
+			<path><![CDATA[]]></path>
+			<priceWording><![CDATA[]]></priceWording>
+			<stateWording><![CDATA[]]></stateWording>
+			<productImageURL><![CDATA[]]></productImageURL>
+			<products><![CDATA[]]></products>
+			<productsCount><![CDATA[0]]></productsCount>
+		</finderOrder>
+		<finderShopWindowShare>
+			<finderUsername><![CDATA[]]></finderUsername>
+			<avatar><![CDATA[]]></avatar>
+			<nickname><![CDATA[]]></nickname>
+			<commodityInStockCount><![CDATA[]]></commodityInStockCount>
+			<appId><![CDATA[]]></appId>
+			<path><![CDATA[]]></path>
+			<appUsername><![CDATA[]]></appUsername>
+			<query><![CDATA[]]></query>
+			<liteAppId><![CDATA[]]></liteAppId>
+			<liteAppPath><![CDATA[]]></liteAppPath>
+			<liteAppQuery><![CDATA[]]></liteAppQuery>
+			<platformTagURL><![CDATA[]]></platformTagURL>
+			<saleWording><![CDATA[]]></saleWording>
+			<lastGMsgID><![CDATA[]]></lastGMsgID>
+			<profileTypeWording><![CDATA[]]></profileTypeWording>
+			<reputationInfo>
+				<hasReputationInfo>0</hasReputationInfo>
+				<reputationScore>0</reputationScore>
+				<reputationWording />
+				<reputationTextColor />
+				<reputationLevelWording />
+				<reputationBackgroundColor />
+			</reputationInfo>
+			<productImageURLList />
+		</finderShopWindowShare>
+		<findernamecard>
+			<username />
+			<avatar><![CDATA[]]></avatar>
+			<nickname />
+			<auth_job />
+			<auth_icon>0</auth_icon>
+			<auth_icon_url />
+			<ecSource><![CDATA[]]></ecSource>
+			<lastGMsgID><![CDATA[]]></lastGMsgID>
+		</findernamecard>
+		<finderGuarantee>
+			<scene><![CDATA[0]]></scene>
+		</finderGuarantee>
+		<directshare>0</directshare>
+		<gamecenter>
+			<namecard>
+				<iconUrl />
+				<name />
+				<desc />
+				<tail />
+				<jumpUrl />
+			</namecard>
+		</gamecenter>
+		<patMsg>
+			<chatUser />
+			<records>
+				<recordNum>0</recordNum>
+			</records>
+		</patMsg>
+		<secretmsg>
+			<issecretmsg>0</issecretmsg>
+		</secretmsg>
+		<referfromscene>0</referfromscene>
+		<gameshare>
+			<liteappext>
+				<liteappbizdata />
+				<priority>0</priority>
+			</liteappext>
+			<appbrandext>
+				<litegameinfo />
+				<priority>-1</priority>
+			</appbrandext>
+			<gameshareid />
+			<sharedata />
+			<isvideo>0</isvideo>
+			<duration>0</duration>
+			<isexposed>0</isexposed>
+			<readtext />
+		</gameshare>
+		<mpsharetrace>
+			<hasfinderelement>0</hasfinderelement>
+			<lastgmsgid />
+		</mpsharetrace>
+		<wxgamecard>
+			<framesetname />
+			<mbcarddata />
+			<minpkgversion />
+			<mbcardheight>0</mbcardheight>
+			<isoldversion>0</isoldversion>
+		</wxgamecard>
+	</appmsg>
+	<fromusername>{from_wx_id}</fromusername>
+	<scene>0</scene>
+	<appinfo>
+		<version>1</version>
+		<appname />
+	</appinfo>
+	<commenturl />
+</msg>
+    '''
+    return xml
