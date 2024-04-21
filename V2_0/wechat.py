@@ -1,5 +1,5 @@
 from WeChatPYAPI import WeChatPYApi
-from utils import WX_MSG_TYPE_MAP,KEY_QUEUE_WXMSG_SEND,KEY_QUEUE_WXMSG_RECV
+from wechatUtils import WX_MSG_TYPE_MAP,KEY_QUEUE_WXMSG_SEND,KEY_QUEUE_WXMSG_RECV
 import utils
 import time
 from queue import Queue
@@ -8,7 +8,7 @@ import logging
 
 
 log=utils.get_logger()
-w=None
+wx=None
 my_info=None
 friend_list= {}
 
@@ -17,6 +17,7 @@ friend_list= {}
 def __msg_preproc(msg):
     global my_info
     wx_acc = my_info['wx_account']
+    my_wx_id=my_info['wx_id']
     is_self_msg=msg.get('is_self_msg')
     wx_id = msg.get("wx_id")
     sender = msg.get("sender")
@@ -40,7 +41,7 @@ def __msg_preproc(msg):
         if msg_type_str:
             msg['msg_type_str']=msg_type_str
         else:
-            log.warning(f'未定义的消息类型：[{wx_acc}] msg_type={msg_type} 详细={utils.wx_msg_tostring(msg)}')
+            log.warning(f'未定义的消息类型：微信账号={wx_acc}/{my_wx_id} 发送人={wx_id} msg_type={msg_type} 详细={utils.wx_msg_tostring(msg)}')
 
 
 
@@ -48,11 +49,12 @@ def __msg_recv_inqueue(msg):
     try:
         global my_info
         wx_acc=my_info['wx_account']
-        key=KEY_QUEUE_WXMSG_RECV.format(wx_acc)
+        my_wx_id = my_info['wx_id']
+        key=KEY_QUEUE_WXMSG_RECV.format(my_wx_id)
         redis = utils.get_redis()
         jstr = utils.obj_to_json(msg)
         redis.lpush(key, jstr)
-        log.info(f'wechat-recv-msg-inqueue [{wx_acc}]-> {utils.wx_msg_tostring(msg)}')
+        log.info(f'wechat-recv-msg-inqueue [{wx_acc}/{my_wx_id}]-> {utils.wx_msg_tostring(msg)}')
     except Exception as e:
         log.error(e,exc_info=True)
 
@@ -60,7 +62,8 @@ def __msg_recv_outqueue():
     try:
         global my_info
         wx_acc = my_info['wx_account']
-        key = KEY_QUEUE_WXMSG_RECV.format(wx_acc)
+        my_wx_id = my_info['wx_id']
+        key = KEY_QUEUE_WXMSG_RECV.format(my_wx_id)
         redis = utils.get_redis()
         temp = redis.rpop(key)
         if temp is None:
@@ -68,7 +71,7 @@ def __msg_recv_outqueue():
         msg = utils.json_to_obj(temp)
         return msg
     except Exception as e:
-        log.error(e, exc_info=True)
+        log.error(f'微信消息出栈异常[{wx_acc}/{my_wx_id}]：{e}', exc_info=True)
 
 def __msg_send_outqueue():
     try:
@@ -102,7 +105,7 @@ def __on_exit_callback(event):
         log.warning("微信({})：已退出登录，请重新登录".format(wx_id))
 
 def __pull_friends():
-    global w
+    global wx
     # 拉取列表（好友/群/公众号等）拉取可能会阻塞，可以自行做异步处理
     # 好友列表：pull_type = 1
     # 群列表：pull_type = 2
@@ -145,7 +148,7 @@ def start(msg_handler=None):
 
     # # 查看帮助
     # help(WeChatPYApi)
-    global w,my_info
+    global wx,my_info
     # 实例化api对象【要多开的话就实例化多个《WeChatPYApi》对象】
     w = WeChatPYApi(msg_callback=__on_msg_callback, exit_callback=__on_exit_callback, logger=log)
 
@@ -173,7 +176,6 @@ def start(msg_handler=None):
         msg_recv=__msg_recv_outqueue()
         if msg_recv:
             type = msg_recv['type']
-            msg_type = msg_recv["msg_type"]
             if type == 100:
                 if msg_handler:
                     try:

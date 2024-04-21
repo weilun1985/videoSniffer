@@ -121,7 +121,7 @@ class ResInfoForApi:
 
     @staticmethod
     def parse(res:ResInfo):
-        host="https://1e63211h01.yicp.fun/resproxy/"
+        # host="https://1e63211h01.yicp.fun/resproxy/"
         index_info=ResInfoForApi()
         index_info.id=res.id
         if hasattr(res,'name'):
@@ -132,8 +132,8 @@ class ResInfoForApi:
         index_info.res_type=res.res_type
         if isinstance(res,VideoInfo):
             durl=res.res_url
-            if not is_host_in_wxdw(durl):
-                durl=f'{host}{res.id}_0.mp4'
+            # if not is_host_in_wxdw(durl):
+            #     durl=f'{host}{res.id}_0.mp4'
             index_info.video={
                 'url':res.res_url,
                 'durl':durl,
@@ -148,8 +148,8 @@ class ResInfoForApi:
                 url=res.res_url_list[i]
                 urls.append(url)
                 durl=url
-                if not is_host_in_wxdw(durl):
-                    durl = f'{host}{res.id}_{i}.jpg'
+                # if not is_host_in_wxdw(durl):
+                #     durl = f'{host}{res.id}_{i}.jpg'
                 durls.append(durl)
                 if has_size:
                     sizes.append(res.res_size_list[i])

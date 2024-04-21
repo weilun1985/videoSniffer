@@ -16,11 +16,15 @@ Page({
             this.loadResInfo(id);
             // this.checkReset();
         }else{
-            this.autoFillResId();
+            // this.autoFillResId();
         }
     },
+    onVideoError:function(e){
+        console.warn('视频加载错误：',this.data.id,e);
+        // e.currentTarget.stop();
+    },
     onPlay:function(e){
-        console.log(e);
+        console.log('视频开始播放：',this.data.id,e);
         const myVideoContext = wx.createVideoContext('myVideo');
     },
     resId_input(e){

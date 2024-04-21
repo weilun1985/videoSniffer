@@ -6,7 +6,7 @@
 
 import logging
 import os
-from webapp.app_conf import web_template_dir,current_file_dir,current_work_dir,web_static_dir,web_favicon_path
+from webapp.app_conf import web_template_dir,current_file_dir,current_work_dir,web_static_dir,web_favicon_path,web_wxscan_file
 from sanic import Sanic
 from sanic import request
 from sanic.log import logger
@@ -16,6 +16,7 @@ from webapp.controller import controller_bp
 app= Sanic('videoSniffer-web')
 app.static(uri='/static', file_or_directory=web_static_dir,directory_view=True)
 app.static(name='favicon.ico',uri='/favicon.ico',file_or_directory=web_favicon_path)
+app.static(name='jplYnoJ9k8.txt',uri='/jplYnoJ9k8.txt',file_or_directory=web_wxscan_file)
 tp_loader = FileSystemLoader(web_template_dir)
 tp = sj(app,loader=tp_loader)
 app.blueprint(controller_bp)

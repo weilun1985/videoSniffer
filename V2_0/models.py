@@ -40,3 +40,21 @@ class ResInfoForApi:
         self.descp=None
         self.video=None
         self.image=None
+
+def res_info_stringfy(res_info):
+    if res_info is None:
+        return
+    str=f'资源ID：{res_info.id}'
+    str+=f'\r\n资源类型：{type(res_info).__name__}'
+    if hasattr(res_info,'name'):
+        str += f'\r\n资源名称：{res_info.name}'
+    if hasattr(res_info, 'content'):
+        str += f'\r\n资源描述：{res_info.content}'
+    str+=f'\r\n分享URL：{res_info.share_url}'
+    str+=f'\r\n资源数量：{1 if isinstance(res_info,VideoInfo) else len(res_info.res_url_list)}'
+    if isinstance(res_info,VideoInfo):
+        str+=f'\r\n\t1. {res_info.res_url}'
+    else:
+        for index,url in enumerate(res_info.res_url_list):
+            str+=f'\r\n\t{index}. {url}'
+    return str

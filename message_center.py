@@ -117,6 +117,12 @@ def setResInfoToRedis(info):
     log.info(f'set resInfo to redis: id={id}')
     redis.set(key,jstr)
 
+def clearResInfo(id):
+    key = tools.SET_RES_INFO.format(id)
+    redis = tools.get_redis()
+    del_cnt=redis.delete(key)
+    return del_cnt
+
 def getResInfo4Api(id):
     resInfo=getResInfoFromRedis(id)
     if resInfo is None:

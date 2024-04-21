@@ -18,7 +18,7 @@ async def res(request: request.Request):
     if tools.is_empty_str(id):
         errmsg = f'资源ID不能为空，请确认ID是否正确，或重新发起资源查找。'
         return wrapper_json(None,errmsg)
-    logger.info(f"found res: id={id}")
+    logger.info(f"load res: id={id}")
     try:
         data=message_center.getResInfo4Api(id)
     except Exception as e:
@@ -27,6 +27,27 @@ async def res(request: request.Request):
         return wrapper_json(None, errmsg)
     if data is None:
         errmsg=f'未找到ID为“{id}”的资源，请确认ID是否正确，或重新发起资源查找。'
+        return wrapper_json(None, errmsg)
+    return wrapper_json(data,None)
+
+@controller_bp.route("/res_clear",methods =['GET'])
+@cors(origin='*')
+async def res_clear(request: request.Request):
+    id=request.args.get('id')
+    if tools.is_empty_str(id):
+        errmsg = f'资源ID不能为空，请确认ID是否正确。'
+        return wrapper_json(None,errmsg)
+    logger.info(f"clear res: id={id}")
+    try:
+        del_cnt=message_center.clearResInfo(id)
+        if del_cnt==0:
+            errmsg = f'未能清理ID为“{id}”的资源，请确认ID是否正确'
+    except Exception as e:
+        logger.error(e,exc_info=True)
+        errmsg=f'抱歉，服务出现了异常，请稍后再试：{e}'
+        return wrapper_json(None, errmsg)
+    if data is None:
+        errmsg=f'未能清理ID为“{id}”的资源，请确认ID是否正确'
         return wrapper_json(None, errmsg)
     return wrapper_json(data,None)
 
