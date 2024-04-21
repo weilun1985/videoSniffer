@@ -22,6 +22,22 @@ Page({
     onVideoError:function(e){
         console.warn('视频加载错误：',this.data.id,e);
         // e.currentTarget.stop();
+        this.reportResErr(this.data.id,e,(resid,result)=>{
+            wx.showModal({
+                title: '提示',  
+                content: '资源可能已过期，已上报服务器核查，接下来将会重新打开小程序尝试。',  
+                showCancel: false,  
+                confirmText: '我知道了',  
+                success(res) {
+                  if (res.confirm) {
+                    wx.redirectTo({
+                        url: `/pages/index/index?id=${resid}`,
+                    })
+                  }
+                }
+              });
+        });
+
     },
     onPlay:function(e){
         console.log('视频开始播放：',this.data.id,e);
@@ -134,6 +150,25 @@ Page({
         console.log(this.data.swiperCurrent);
         wx.switchTab({
             url: this.data.image.urls[this.data.swiperCurrent]
+        })
+    },
+    reportResErr(resid,err,handler){
+        var err=err?encodeURIComponent(err.detail.errMsg):'';
+        // url=`https://1e63211h01.yicp.fun/res_err?id=${resid}&err=${err}`
+        var url=`http://localhost:8082/res_err?id=${resid}&err=${err}`
+        wx.request({
+          url: url,
+          method:'GET',
+          header:{'content-type':'application/json'},
+          success:(res)=>{
+              if(res.statusCode==200&&res.data.success){
+                var data=res.data.data;
+                console.dir(data);
+                if(handler){
+                    handler(resid,data)
+                }
+              }
+          }
         })
     },
     loadResInfo(resid){

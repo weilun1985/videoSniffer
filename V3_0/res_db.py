@@ -30,6 +30,9 @@ def setResInfoToRedis(info):
     # log.info(f'set resInfo to redis: id={id}')
     redis.set(key,jstr)
 
+def addResToRegetQueue(res_id):
+    pass
+
 def getResInfo4Api(id):
     resInfo=getResInfoFromRedis(id)
     if resInfo is None:
@@ -41,6 +44,7 @@ def listResInfoIds():
     key_patten=utils.SET_RES_INFO.format('*')
     key_prex=utils.SET_RES_INFO.format('')
     redis = utils.get_redis()
+    log.info(f'redis:{redis}')
     key_list=redis.keys(key_patten)
     list=[]
     for key in key_list:

@@ -30,6 +30,17 @@ async def res(request: request.Request):
         return wrapper_json(None, errmsg)
     return wrapper_json(data,None)
 
+@controller_bp.route("/res_err",methods =['GET'])
+@cors(origin='*')
+async def res_err(request):
+    id = request.args.get('id')
+    err=request.args.get('err')
+    logger.info(f"res report err: id={id} err={err}")
+    from res_fetcher import re_fetch
+    info=re_fetch(id)
+    return wrapper_json(info, None)
+
+
 @controller_bp.route("/res_clear",methods =['GET'])
 @cors(origin='*')
 async def res_clear(request: request.Request):

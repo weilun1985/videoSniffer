@@ -42,6 +42,43 @@ class ResInfoForApi:
         self.video=None
         self.image=None
 
+    @staticmethod
+    def parse(res: ResInfo):
+        index_info = ResInfoForApi()
+        index_info.id = res.id
+        if hasattr(res, 'name'):
+            index_info.title = res.name
+        if hasattr(res, 'content'):
+            index_info.descp = res.content
+        # index_info.res_downloaded=res.res_downloaded
+        index_info.res_type = res.res_type
+        if isinstance(res, VideoInfo):
+            durl = res.res_url
+            index_info.video = {
+                'url': res.res_url,
+                'durl': durl,
+                'size': res.res_size if hasattr(res, 'res_size') else 0
+            }
+        elif isinstance(res, PictureInfo):
+            urls, durls, sizes = [], [], []
+            n = len(res.res_url_list)
+            sn = len(res.res_size_list) if hasattr(res, 'res_size_list') else 0
+            has_size = (n > 0 and sn == n)
+            for i in range(n):
+                url = res.res_url_list[i]
+                urls.append(url)
+                durl = url
+                durls.append(durl)
+                if has_size:
+                    sizes.append(res.res_size_list[i])
+            index_info.image = {
+                'urls': urls,
+                'durls': durls
+            }
+            if has_size:
+                index_info.image['sizes'] = sizes
+        return index_info
+
 def res_info_stringfy(res_info):
     if res_info is None:
         return

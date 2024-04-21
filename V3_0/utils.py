@@ -17,14 +17,16 @@ URL_PATTERN="(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*(\?[^\s\?\u4
 
 SET_RES_INFO='VideoSniffer:Res_Info:{}'
 
-HOST_REDIS='192.168.1.27'
-PORT_REDIS=6378
+# HOST_REDIS='192.168.1.27'
+# PORT_REDIS=6378
 
 def get_host_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
-        ip = s.getsockname()[0]
+        ips=s.getsockname()
+        ip = ips[0]
+        print('ip=',ips)
     finally:
         s.close()
     return ip
@@ -36,12 +38,6 @@ def is_empty_str(instr:str):
     if len(instr)==0:
         return True
     return False
-
-__redis_pool=redis.ConnectionPool(host=('localhost')if(get_host_ip()==HOST_REDIS)else HOST_REDIS,port=PORT_REDIS,decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
-
-def get_redis():
-    redis_conn = redis.Redis(connection_pool=__redis_pool)
-    return redis_conn
 
 __logger=None
 def get_logger(level=logging.INFO):
@@ -71,6 +67,40 @@ def get_logger(level=logging.INFO):
     logger.addHandler(console_handler)
     __logger=logger
     return logger
+
+def get_config_item(group,key):
+    config = configparser.ConfigParser()
+    config.read('config.ini',encoding='utf-8')
+    value=config.get(group,key)
+    return value
+
+# __redis_pool=redis.ConnectionPool(host=('localhost')if(get_host_ip()==HOST_REDIS)else HOST_REDIS,port=PORT_REDIS,decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
+
+# __redis_pool=redis.ConnectionPool(host=HOST_REDIS,port=PORT_REDIS,decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
+
+
+def init_redis_pool():
+    this_host=get_host_ip()
+    redis_df_host=get_config_item('redis','host')
+    redis_df_port=get_config_item('redis','port')
+    log=get_logger()
+
+    if this_host==redis_df_host:
+        host='localhost'
+    else:
+        host=redis_df_host
+    redis_pool=redis.ConnectionPool(host=host,port=redis_df_port,decode_responses=True,socket_connect_timeout=1,socket_keepalive=5,max_connections=10)
+    log.info(f'Init Reids Pool: this-host={this_host} redis-df-host={redis_df_host} redis-df-port={redis_df_port} init-host={host}')
+    return redis_pool
+
+
+__redis_pool=init_redis_pool()
+
+def get_redis():
+    redis_conn = redis.Redis(connection_pool=__redis_pool)
+    return redis_conn
+
+
 
 def json_to_obj(json_str,obj_class=None):
     data = json.loads(json_str.strip('\t\r\n'))
@@ -148,9 +178,5 @@ def get_url_query_values(url,*keys):
         values.append(param_value)
     return tuple(values)
 
-def get_config_item(group,key):
-    config = configparser.ConfigParser()
-    config.read('config.ini',encoding='utf-8')
-    value=config.get(group,key)
-    return value
+
 
