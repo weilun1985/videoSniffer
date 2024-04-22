@@ -1,13 +1,13 @@
 import time
-import utils
-from models import ResInfo,PictureInfo,VideoInfo
+import V3_0.utils as utils
+from V3_0.models import PictureInfo,VideoInfo
 from lxml import etree
 
 
 
 WX_MSG_TYPE_MAP = {1: '[文本]', 3: '[图片]', 43: '[视频]', 49: '[链接]', 34: '[语音]', 10000: '[系统消息]', 47: '[表情包]', 492: '[链接]', 494: '[小程序]', 493: '[文件]'}
-KEY_QUEUE_WXMSG_RECV='VideoSniffer:WeChat:{}:recv_queue'
-KEY_QUEUE_WXMSG_SEND='VideoSniffer:WeChat:{}:send_queue'
+KEY_QUEUE_WXMSG_RECV='WeChat:{}:recv_queue'
+KEY_QUEUE_WXMSG_SEND='WeChat:{}:send_queue'
 
 
 
@@ -450,5 +450,30 @@ def send_wx_resApp_reply(reply_to_msg,res_info):
             'xml_str': xml
         }
     })
-
     log.info(f'已回发资源小程序[卡片]：资源ID={res_id} 资源名称={res_name} 接收人={reply_to_msg.get("sender")}')
+
+
+def run_weichat_daemon(title,handler):
+    print(f'微信通道监控启动："{title}"...')
+    lwxid, wxid = None, None
+    while True:
+        try:
+            # wxid='wxid_4qg4sxvncs1c22' # 测试微信
+            # wxid='wxid_bai8c34ycldr12' # 正式微信
+            wxid = utils.get_config_item('wechat', 'wxid')
+            if not wxid:
+                log.error(f'未设置监听微信！')
+                time.sleep(1)
+                continue
+            if not lwxid == wxid:
+                log.info(f'开始监听微信通道：{wxid}')
+                lwxid = wxid
+            msg = msg_recv_outqueue(wxid)
+            if msg and handler:
+                handler(msg)
+            else:
+                time.sleep(0.1)
+        except Exception as e:
+            log.error(e, exc_info=True)
+            time.sleep(0.2)
+    input(f'微信通道监控"{title}"停止，请输入任意键结束。。。')

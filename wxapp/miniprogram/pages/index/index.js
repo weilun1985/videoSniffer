@@ -154,8 +154,8 @@ Page({
     },
     reportResErr(resid,err,handler){
         var err=err?encodeURIComponent(err.detail.errMsg):'';
-        // url=`https://1e63211h01.yicp.fun/res_err?id=${resid}&err=${err}`
-        var url=`http://localhost:8082/res_err?id=${resid}&err=${err}`
+        var url=`https://1e63211h01.yicp.fun/res_err?id=${resid}&err=${err}`
+        // var url=`http://localhost:8082/res_err?id=${resid}&err=${err}`
         wx.request({
           url: url,
           method:'GET',
