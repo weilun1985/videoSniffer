@@ -44,7 +44,7 @@ def get_request_body(prompt,session_id,model):
     }
     return data
 
-async def send(data,handler):
+async def send(data,out):
     json_data=json.dumps(data) if data else None
 
     async with aiohttp.ClientSession(headers=custom_headers, cookies=custom_cookies) as session:
@@ -56,6 +56,7 @@ async def send(data,handler):
                     data = line.decode('utf-8').strip()
                     if data.startswith('data:'):
                         str=data[5:]
+
                         if not str=='[DONE]':
                             obj=json.loads(str)
                             code=obj.get('code')
@@ -68,37 +69,27 @@ async def send(data,handler):
                                 chat_model=content.get('chat_model')
                                 if type=='text':
                                     text=content.get('text')
-                                    # print(text,end='')
-                                    r_str+=text
-                                    time1=time.time()
-                                    if (time1-time0)>1:
-                                        print(r_str)
-                                        if handler:
-                                            handler(r_str)
-                                        r_str=''
-                                        time0=time1
-                                    # time.sleep(0.1)
+                                    if out:
+                                        out.write_text(text)
                                 else:
                                     print(data)
                             else:
                                 msg=obj.get('msg')
                                 print(f'出现异常： code={code} msg={msg}\r\n{data}')
                         else:
-                            print(r_str)
-                            if handler:
-                                handler(r_str)
-                            r_str = ''
+                            if out:
+                                out.done()
                             print('DONE')
 
 
 
-async def chat(input,session_id,model=0,handler=None):
+async def chat(input,session_id,model=0,out=None):
     data=get_request_body(input,session_id,models[model])
-    await send(data,handler)
+    await send(data,out)
 
-def sync_chat(input,session_id,model=0,handler=None):
+def sync_chat(input,session_id,model=0,out=None):
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(chat(input,session_id,model,handler))
+    loop.run_until_complete(chat(input,session_id,model,out))
 
 async def test():
     input='世界上有神吗？'
